@@ -1,0 +1,24 @@
+# Force LF
+*.c text eol=lf
+*.cc text eol=lf
+*.cmake text eol=lf
+*.gradle text eol=lf
+*.h text eol=lf
+*.java text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.plist text eol=lf
+*.pro text eol=lf
+*.properties text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+.clang-format text eol=lf
+.editorconfig text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+gradlew text eol=lf
+CMakeLists.txt text eol=lf
+LICENSE text eol=lf
+
+# Force CRLF
+*.bat text eol=crlf

@@ -1,0 +1,271 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  static-analysis:
+    name: Static analysis
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install
+        run: |
+          sudo apt update
+          sudo apt install cppcheck
+
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: cppcheck
+        run: cppcheck --std=c++17 src/
+
+  android:
+    name: Android
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: gradle
+
+      - name: Cache cmake build
+        uses: actions/cache@v3
+        with:
+          path: os/android/app/.cxx
+          key: android-cmake-v1
+
+      - name: Setup signing config
+        if: env.KEYSTORE_FILE_BASE64 != '' && env.KEYSTORE_PROPERTIES_FILE_BASE64 != ''
+        run: |
+          cd os/android
+          echo "$KEYSTORE_FILE_BASE64" | base64 --decode > debug.keystore
+          echo "$KEYSTORE_PROPERTIES_FILE_BASE64" | base64 --decode > debug-keystore.properties
+        env:
+          KEYSTORE_FILE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_FILE_BASE64 }}
+          KEYSTORE_PROPERTIES_FILE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_PROPERTIES_FILE_BASE64 }}
+
+      - name: Build
+        run: |
+          cd os/android
+          ./gradlew assembleDebug
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: fallout-ce-debug.apk
+          path: os/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+
+  ios:
+    name: iOS
+
+    runs-on: macos-11
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Cache cmake build
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: ios-cmake-v1
+
+      - name: Configure
+        run: |
+          cmake \
+            -B build \
+            -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+            -D CMAKE_TOOLCHAIN_FILE=cmake/toolchain/ios.toolchain.cmake \
+            -D ENABLE_BITCODE=0 \
+            -D PLATFORM=OS64 \
+            # EOL
+
+      - name: Build
+        run: |
+          cmake \
+            --build build \
+            -j $(sysctl -n hw.physicalcpu) \
+            --target package \
+            # EOL
+
+      # TODO: Should be a part of packaging.
+      - name: Prepare for uploading
+        run: |
+          cp build/fallout-ce.zip build/fallout-ce.ipa
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: fallout-ce.ipa
+          path:  build/fallout-ce.ipa
+          retention-days: 7
+
+  linux:
+    name: Linux (${{ matrix.arch }})
+
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86
+          - x64
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Dependencies (x86)
+        if: matrix.arch == 'x86'
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install --allow-downgrades libpcre2-8-0=10.34-7
+          sudo apt install g++-multilib libsdl2-dev:i386 zlib1g-dev:i386
+
+      - name: Dependencies (x64)
+        if: matrix.arch == 'x64'
+        run: |
+          sudo apt update
+          sudo apt install libsdl2-dev zlib1g-dev
+
+      - name: Cache cmake build
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: linux-${{ matrix.arch }}-cmake-v1
+
+      - name: Configure (x86)
+        if: matrix.arch == 'x86'
+        run: |
+          cmake \
+            -B build \
+            -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+            -D CMAKE_TOOLCHAIN_FILE=cmake/toolchain/Linux32.cmake \
+            # EOL
+
+      - name: Configure (x64)
+        if: matrix.arch == 'x64'
+        run: |
+          cmake \
+            -B build \
+            -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+            # EOL
+
+      - name: Build
+        run: |
+          cmake \
+            --build build \
+            -j $(nproc) \
+            # EOL
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: fallout-ce-linux-${{ matrix.arch }}
+          path:  build/fallout-ce
+          retention-days: 7
+
+  macos:
+    name: macOS
+
+    runs-on: macos-11
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Cache cmake build
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: macos-cmake-v3
+
+      - name: Configure
+        run: |
+          cmake \
+            -B build \
+            -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+            # EOL
+
+      - name: Build
+        run: |
+          cmake \
+            --build build \
+            -j $(sysctl -n hw.physicalcpu) \
+            --target package \
+            # EOL
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: fallout-ce-macos.dmg
+          path:  build/fallout-ce.dmg
+          retention-days: 7
+
+  windows:
+    name: Windows (${{ matrix.arch }})
+
+    runs-on: windows-2019
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86
+            generator-platform: Win32
+          - arch: x64
+            generator-platform: x64
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Cache cmake build
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: windows-${{ matrix.arch }}-cmake-v1
+
+      - name: Configure
+        run: |
+          cmake \
+            -B build \
+            -G "Visual Studio 16 2019" \
+            -A ${{ matrix.generator-platform }} \
+            # EOL
+
+      - name: Build
+        run: |
+          cmake \
+            --build build \
+            --config RelWithDebInfo \
+            # EOL
+
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: fallout-ce-windows-${{ matrix.arch }}
+          path:  build/RelWithDebInfo/fallout-ce.exe
+          retention-days: 7
