@@ -523,9 +523,6 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
                 if (a2 == obj_dude) {
                     intface_update_hit_points(true);
                 }
-
-                scr_exec_map_update_scripts();
-                palette_fade_to(cmap);
             } else {
                 // You fail to do any healing.
                 messageListItem.num = 503;
@@ -536,6 +533,9 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
                 snprintf(text, sizeof(text), messageListItem.text, hpToHeal);
                 display_print(text);
             }
+
+            scr_exec_map_update_scripts();
+            palette_fade_to(cmap);
         } else {
             if (obj == obj_dude) {
                 // 501: You look healty already
