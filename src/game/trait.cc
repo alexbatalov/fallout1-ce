@@ -288,12 +288,12 @@ int trait_adjust_stat(int stat)
         break;
     case STAT_RADIATION_RESISTANCE:
         if (trait_level(TRAIT_FAST_METABOLISM)) {
-            modifier -= -stat_get_base_direct(obj_dude, STAT_RADIATION_RESISTANCE);
+            modifier -= stat_get_base_direct(obj_dude, STAT_RADIATION_RESISTANCE);
         }
         break;
     case STAT_POISON_RESISTANCE:
         if (trait_level(TRAIT_FAST_METABOLISM)) {
-            modifier -= -stat_get_base_direct(obj_dude, STAT_POISON_RESISTANCE);
+            modifier -= stat_get_base_direct(obj_dude, STAT_POISON_RESISTANCE);
         }
         break;
     }
