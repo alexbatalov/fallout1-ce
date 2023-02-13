@@ -16,6 +16,8 @@ void buf_texture(unsigned char* buf, int width, int height, int pitch, void* a5,
 void lighten_buf(unsigned char* buf, int width, int height, int pitch);
 void swap_color_buf(unsigned char* buf, int width, int height, int pitch, int color1, int color2);
 void buf_outline(unsigned char* buf, int width, int height, int pitch, int a5);
+void srcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitch, int width, int height);
+void transSrcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitch, int width, int height);
 
 } // namespace fallout
 

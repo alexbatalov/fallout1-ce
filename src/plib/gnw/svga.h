@@ -9,8 +9,6 @@
 
 namespace fallout {
 
-extern bool mmxEnabled;
-
 extern Rect scr_size;
 extern ScreenBlitFunc* scr_blit;
 
@@ -21,7 +19,6 @@ extern SDL_Texture* gSdlTexture;
 extern SDL_Surface* gSdlTextureSurface;
 extern FpsLimiter sharedFpsLimiter;
 
-void mmxEnable(bool enable);
 int init_mode_320_200();
 int init_mode_320_400();
 int init_mode_640_480_16();

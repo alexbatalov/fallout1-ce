@@ -11,7 +11,6 @@
 #include "plib/gnw/grbuf.h"
 #include "plib/gnw/intrface.h"
 #include "plib/gnw/memory.h"
-#include "plib/gnw/mmx.h"
 #include "plib/gnw/svga.h"
 #include "plib/gnw/text.h"
 #include "plib/gnw/vcr.h"

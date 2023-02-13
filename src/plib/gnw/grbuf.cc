@@ -3,8 +3,6 @@
 #include <string.h>
 
 #include "plib/color/color.h"
-#include "plib/gnw/input.h"
-#include "plib/gnw/mmx.h"
 
 namespace fallout {
 
@@ -329,6 +327,35 @@ void buf_outline(unsigned char* buf, int width, int height, int pitch, int color
 
             ptr += pitch;
         }
+    }
+}
+
+// 0x4CDB50
+void srcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitch, int width, int height)
+{
+    for (int y = 0; y < height; y++) {
+        memcpy(dest, src, width);
+        dest += destPitch;
+        src += srcPitch;
+    }
+}
+
+// 0x4CDC75
+void transSrcCopy(unsigned char* dest, int destPitch, unsigned char* src, int srcPitch, int width, int height)
+{
+    int destSkip = destPitch - width;
+    int srcSkip = srcPitch - width;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            unsigned char c = *src++;
+            if (c != 0) {
+                *dest = c;
+            }
+            dest++;
+        }
+        src += srcSkip;
+        dest += destSkip;
     }
 }
 

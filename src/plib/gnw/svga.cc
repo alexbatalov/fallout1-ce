@@ -4,7 +4,6 @@
 #include "game/intface.h"
 #include "plib/gnw/gnw.h"
 #include "plib/gnw/grbuf.h"
-#include "plib/gnw/mmx.h"
 #include "plib/gnw/mouse.h"
 #include "plib/gnw/winmain.h"
 
@@ -15,9 +14,6 @@ static int GNW95_init_mode(int width, int height);
 
 static bool createRenderer(int width, int height);
 static void destroyRenderer();
-
-// 0x51E2C8
-bool mmxEnabled = true;
 
 // screen rect
 Rect scr_size;
@@ -33,25 +29,6 @@ SDL_Surface* gSdlTextureSurface = NULL;
 
 // TODO: Remove once migration to update-render cycle is completed.
 FpsLimiter sharedFpsLimiter;
-
-// 0x4CACD0
-void mmxEnable(bool enable)
-{
-    // 0x51E2CC
-    static bool inited = false;
-
-    // 0x6ACA20
-    static bool mmx;
-
-    if (!inited) {
-        mmx = mmxTest();
-        inited = true;
-    }
-
-    if (mmx) {
-        mmxEnabled = enable;
-    }
-}
 
 // 0x4CAD08
 int init_mode_320_200()
@@ -160,8 +137,6 @@ static int GNW95_init_mode_ex(int width, int height, int bpp)
     scr_size.uly = 0;
     scr_size.lrx = width - 1;
     scr_size.lry = height - 1;
-
-    mmxEnable(true);
 
     mouse_blit_trans = NULL;
     scr_blit = GNW95_ShowRect;

@@ -232,8 +232,6 @@ target_sources(${EXECUTABLE_NAME} PUBLIC
     "src/plib/gnw/kb.h"
     "src/plib/gnw/memory.cc"
     "src/plib/gnw/memory.h"
-    "src/plib/gnw/mmx.cc"
-    "src/plib/gnw/mmx.h"
     "src/plib/gnw/mouse.cc"
     "src/plib/gnw/mouse.h"
     "src/plib/gnw/rect.cc"
