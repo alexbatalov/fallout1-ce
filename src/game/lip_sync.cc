@@ -247,11 +247,13 @@ static int lips_read_lipsynch_info(LipsData* lipsData, DB_FILE* stream)
     if (db_freadInt8List(stream, lipsData->field_60, 4) == -1) return -1;
     if (db_freadInt8List(stream, lipsData->field_64, 260) == -1) return -1;
 
-    // TODO: What for?
-    lipsData->sound = (Sound*)sound;
-    lipsData->field_14 = (void*)field_14;
-    lipsData->phonemes = (unsigned char*)phonemes;
-    lipsData->markers = (SpeechMarker*)markers;
+    // NOTE: Original code is different. For unknown reason it assigns values
+    // from file (integers) and treat them as pointers, which is obviously wrong
+    // is in this case.
+    lipsData->sound = nullptr;
+    lipsData->field_14 = nullptr;
+    lipsData->phonemes = nullptr;
+    lipsData->markers = nullptr;
 
     return 0;
 }
