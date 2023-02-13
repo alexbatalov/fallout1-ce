@@ -241,7 +241,7 @@ static int lips_read_lipsynch_info(LipsData* lipsData, DB_FILE* stream)
     if (db_freadInt32(stream, &(lipsData->field_44)) == -1) return -1;
     if (db_freadInt32(stream, &(lipsData->field_48)) == -1) return -1;
     if (db_freadInt32(stream, &(lipsData->field_4C)) == -1) return -1;
-    if (db_freadInt8List(stream, lipsData->field_50, 8) == -1) return -1;
+    if (db_freadInt8List(stream, lipsData->file_name, 8) == -1) return -1;
     if (db_freadInt8List(stream, lipsData->field_58, 4) == -1) return -1;
     if (db_freadInt8List(stream, lipsData->field_5C, 4) == -1) return -1;
     if (db_freadInt8List(stream, lipsData->field_60, 4) == -1) return -1;
@@ -261,7 +261,7 @@ int lips_load_file(const char* audioFileName, const char* headFileName)
 {
     char* sep;
     int i;
-    char v60[16];
+    char audioBaseName[16];
 
     SpeechMarker* speech_marker;
     SpeechMarker* prev_speech_marker;
@@ -280,16 +280,16 @@ int lips_load_file(const char* audioFileName, const char* headFileName)
         *sep = '\0';
     }
 
-    strcpy(v60, audioFileName);
+    strcpy(audioBaseName, audioFileName);
 
-    sep = strchr(v60, '.');
+    sep = strchr(audioBaseName, '.');
     if (sep != NULL) {
         *sep = '\0';
     }
 
-    strcpy(lip_info.field_50, v60);
+    strncpy(lip_info.file_name, audioBaseName, sizeof(lip_info.file_name));
 
-    strcat(path, lips_fix_string(lip_info.field_50, sizeof(lip_info.field_50)));
+    strcat(path, lips_fix_string(lip_info.file_name, sizeof(lip_info.file_name)));
     strcat(path, ".");
     strcat(path, lip_info.field_60);
 
@@ -322,7 +322,7 @@ int lips_load_file(const char* audioFileName, const char* headFileName)
             if (db_freadInt32(stream, &(lip_info.phoneme_count)) == -1) return -1;
             if (db_freadInt32(stream, &(lip_info.field_28)) == -1) return -1;
             if (db_freadInt32(stream, &(lip_info.marker_count)) == -1) return -1;
-            if (db_freadInt8List(stream, lip_info.field_50, 8) == -1) return -1;
+            if (db_freadInt8List(stream, lip_info.file_name, 8) == -1) return -1;
             if (db_freadInt8List(stream, lip_info.field_58, 4) == -1) return -1;
         } else {
             debug_printf("\nError: Lips file WRONG version!");
@@ -427,7 +427,7 @@ static int lips_make_speech()
     }
 
     char path[COMPAT_MAX_PATH];
-    char* v1 = lips_fix_string(lip_info.field_50, sizeof(lip_info.field_50));
+    char* v1 = lips_fix_string(lip_info.file_name, sizeof(lip_info.file_name));
     snprintf(path, sizeof(path), "%s%s\\%s.%s", "SOUND\\SPEECH\\", lips_subdir_name, v1, "ACM");
 
     if (lip_info.sound != NULL) {
