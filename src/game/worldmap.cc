@@ -3536,7 +3536,7 @@ static int RegTMAPsels(int win, int city)
     int color = colorTable[992] | 0x10000;
     int v4 = 0;
     int index;
-    char name[16];
+    char name[64];
     int name_x;
     int button_x;
     int button_y;
