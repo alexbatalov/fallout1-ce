@@ -725,7 +725,7 @@ int editor_design(bool isCreationMode)
             }
         } else if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X || keyCode == KEY_F10) {
             game_quit_with_confirm();
-        } else if (keyCode == 502 || keyCode == KEY_ESCAPE || game_user_wants_to_quit != 0) {
+        } else if (keyCode == 502 || keyCode == KEY_ESCAPE || keyCode == KEY_UPPERCASE_C || keyCode == KEY_LOWERCASE_C || game_user_wants_to_quit != 0) {
             rc = 1;
         } else if (glblmode && (keyCode == 517 || keyCode == KEY_UPPERCASE_N || keyCode == KEY_LOWERCASE_N)) {
             NameWindow();

@@ -127,7 +127,7 @@ int skilldex_select()
 
         int keyCode = get_input();
 
-        if (keyCode == KEY_ESCAPE || keyCode == 500 || game_user_wants_to_quit != 0) {
+        if (keyCode == KEY_ESCAPE || keyCode == KEY_UPPERCASE_S || keyCode == KEY_LOWERCASE_S || keyCode == 500 || game_user_wants_to_quit != 0) {
             rc = 0;
         } else if (keyCode == KEY_RETURN) {
             gsound_play_sfx_file("ib1p1xx1");

@@ -431,7 +431,7 @@ void handle_inventory()
 
         int keyCode = get_input();
 
-        if (keyCode == KEY_ESCAPE) {
+        if (keyCode == KEY_ESCAPE || keyCode == KEY_UPPERCASE_I || keyCode == KEY_LOWERCASE_I) {
             break;
         }
 
