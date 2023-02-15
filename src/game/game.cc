@@ -871,6 +871,7 @@ void game_ui_enable()
     if (game_ui_disabled) {
         intface_enable();
         kb_enable();
+        kb_clear();
         gmouse_enable();
         gmouse_3d_on();
         game_ui_disabled = false;
