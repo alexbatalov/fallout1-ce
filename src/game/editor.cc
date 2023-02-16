@@ -2707,7 +2707,7 @@ static void DrawInfoWin()
                     name_sort_list[info_line - 10].name,
                     getmsg(&editor_message_file, &mesg, 126));
 
-                graphicId = 36;
+                graphicId = 46;
                 title = buffer;
                 description = critter_kill_info(name_sort_list[info_line - 10].value);
                 DrawCard(graphicId, title, NULL, description);
