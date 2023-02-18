@@ -66,7 +66,6 @@ namespace fallout {
 #define SPLASH_HEIGHT 480
 #define SPLASH_COUNT 10
 
-static void game_display_counter(double value);
 static int game_screendump(int width, int height, unsigned char* buffer, unsigned char* palette);
 static void game_unload_info();
 static void game_help();
@@ -1016,15 +1015,6 @@ void game_state_update()
     }
 
     game_state_cur = v0;
-}
-
-// 0x43D07C
-static void game_display_counter(double value)
-{
-    char stringBuffer[16];
-
-    snprintf(stringBuffer, sizeof(stringBuffer), "%f", value);
-    display_print(stringBuffer);
 }
 
 // 0x43D0AC

@@ -50,8 +50,6 @@ target_sources(${EXECUTABLE_NAME} PUBLIC
     "src/game/combatai.h"
     "src/game/config.cc"
     "src/game/config.h"
-    "src/game/counter.cc"
-    "src/game/counter.h"
     "src/game/credits.cc"
     "src/game/credits.h"
     "src/game/critter.cc"
