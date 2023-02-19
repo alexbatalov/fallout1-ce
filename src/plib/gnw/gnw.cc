@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include "game/palette.h"
-#include "pointer_registry.h"
 #include "plib/color/color.h"
 #include "plib/db/db.h"
 #include "plib/gnw/button.h"
@@ -22,9 +21,9 @@ namespace fallout {
 static void win_free(int win);
 static void win_clip(Window* window, RectPtr* rectListNodePtr, unsigned char* a3);
 static void refresh_all(Rect* rect, unsigned char* a2);
-static int colorOpen(const char* path, int flags);
-static int colorRead(int fd, void* buf, size_t count);
-static int colorClose(int fd);
+static void* colorOpen(const char* path);
+static int colorRead(void* handle, void* buf, size_t count);
+static int colorClose(void* handle);
 
 // 0x53A22C
 static bool GNW95_already_running = false;
@@ -1334,43 +1333,21 @@ void win_set_trans_b2b(int id, WindowBlitProc* trans_b2b)
 }
 
 // 0x4C422C
-static int colorOpen(const char* path, int flags)
+static void* colorOpen(const char* path)
 {
-    char mode[4];
-    memset(mode, 0, sizeof(mode));
-
-    if ((flags & 0x01) != 0) {
-        mode[0] = 'w';
-    } else if ((flags & 0x10) != 0) {
-        mode[0] = 'a';
-    } else {
-        mode[0] = 'r';
-    }
-
-    if ((flags & 0x100) != 0) {
-        mode[1] = 't';
-    } else if ((flags & 0x200) != 0) {
-        mode[1] = 'b';
-    }
-
-    DB_FILE* stream = db_fopen(path, mode);
-    if (stream != NULL) {
-        return ptrToInt(stream);
-    }
-
-    return -1;
+    return db_fopen(path, "rb");
 }
 
 // 0x4C4298
-static int colorRead(int fd, void* buf, size_t count)
+static int colorRead(void* handle, void* buf, size_t count)
 {
-    return db_fread(buf, 1, count, (DB_FILE*)intToPtr(fd));
+    return db_fread(buf, 1, count, reinterpret_cast<DB_FILE*>(handle));
 }
 
 // 0x4C42A0
-static int colorClose(int fd)
+static int colorClose(void* handle)
 {
-    return db_fclose((DB_FILE*)intToPtr(fd));
+    return db_fclose(reinterpret_cast<DB_FILE*>(handle));
 }
 
 // 0x4C42B8

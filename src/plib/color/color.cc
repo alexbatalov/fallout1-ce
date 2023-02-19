@@ -10,9 +10,9 @@
 
 namespace fallout {
 
-static int colorOpen(const char* filePath, int flags);
-static int colorRead(int fd, void* buffer, size_t size);
-static int colorClose(int fd);
+static void* colorOpen(const char* filePath);
+static int colorRead(void* handle, void* buffer, size_t size);
+static int colorClose(void* handle);
 static void* defaultMalloc(size_t size);
 static void* defaultRealloc(void* ptr, size_t size);
 static void defaultFree(void* ptr);
@@ -105,17 +105,17 @@ static ColorCloseFunc* closeFunc;
 static ColorOpenFunc* openFunc;
 
 // 0x4BFDC0
-static int colorOpen(const char* filePath, int flags)
+static void* colorOpen(const char* filePath)
 {
     if (openFunc != NULL) {
-        return openFunc(filePath, flags);
+        return openFunc(filePath);
     }
 
-    return -1;
+    return nullptr;
 }
 
 // 0x4BFDD8
-static int colorRead(int fd, void* buffer, size_t size)
+static int colorRead(void* fd, void* buffer, size_t size)
 {
     if (readFunc != NULL) {
         return readFunc(fd, buffer, size);
@@ -125,7 +125,7 @@ static int colorRead(int fd, void* buffer, size_t size)
 }
 
 // 0x4BFDF0
-static int colorClose(int fd)
+static int colorClose(void* fd)
 {
     if (closeFunc != NULL) {
         return closeFunc(fd);
@@ -440,8 +440,8 @@ bool loadColorTable(const char* path)
     }
 
     // NOTE: Uninline.
-    int fd = colorOpen(path, 0x200);
-    if (fd == -1) {
+    void* handle = colorOpen(path);
+    if (handle == nullptr) {
         errorStr = _aColor_cColorTa;
         return false;
     }
@@ -452,13 +452,13 @@ bool loadColorTable(const char* path)
         unsigned char b;
 
         // NOTE: Uninline.
-        colorRead(fd, &r, sizeof(r));
+        colorRead(handle, &r, sizeof(r));
 
         // NOTE: Uninline.
-        colorRead(fd, &g, sizeof(g));
+        colorRead(handle, &g, sizeof(g));
 
         // NOTE: Uninline.
-        colorRead(fd, &b, sizeof(b));
+        colorRead(handle, &b, sizeof(b));
 
         if (r <= 0x3F && g <= 0x3F && b <= 0x3F) {
             mappedColor[index] = 1;
@@ -475,23 +475,21 @@ bool loadColorTable(const char* path)
     }
 
     // NOTE: Uninline.
-    colorRead(fd, colorTable, 0x8000);
+    colorRead(handle, colorTable, 0x8000);
 
     unsigned int type;
     // NOTE: Uninline.
-    colorRead(fd, &type, sizeof(type));
+    colorRead(handle, &type, sizeof(type));
 
-    // NOTE: The value is "NEWC". Original code uses cmp opcode, not stricmp,
-    // or comparing characters one-by-one.
-    if (type == 0x4E455743) {
+    if (type == 'NEWC') {
         // NOTE: Uninline.
-        colorRead(fd, intensityColorTable, 0x10000);
+        colorRead(handle, intensityColorTable, 0x10000);
 
         // NOTE: Uninline.
-        colorRead(fd, colorMixAddTable, 0x10000);
+        colorRead(handle, colorMixAddTable, 0x10000);
 
         // NOTE: Uninline.
-        colorRead(fd, colorMixMulTable, 0x10000);
+        colorRead(handle, colorMixMulTable, 0x10000);
     } else {
         setIntensityTables();
 
@@ -503,7 +501,7 @@ bool loadColorTable(const char* path)
     rebuildColorBlendTables();
 
     // NOTE: Uninline.
-    colorClose(fd);
+    colorClose(handle);
 
     return true;
 }

@@ -14,9 +14,9 @@ typedef unsigned char ColorIndex;
 typedef const char*(ColorNameMangleFunc)(const char*);
 typedef void(fade_bk_func)();
 
-typedef int(ColorOpenFunc)(const char* path, int mode);
-typedef int(ColorReadFunc)(int fd, void* buffer, size_t size);
-typedef int(ColorCloseFunc)(int fd);
+typedef void*(ColorOpenFunc)(const char* path);
+typedef int(ColorReadFunc)(void* fd, void* buffer, size_t size);
+typedef int(ColorCloseFunc)(void* fd);
 typedef void*(ColorMallocFunc)(size_t size);
 typedef void*(ColorReallocFunc)(void* ptr, size_t size);
 typedef void(ColorFreeFunc)(void* ptr);
