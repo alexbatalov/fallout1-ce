@@ -33,7 +33,7 @@ typedef struct STRUCT_4F6930 {
     int field_0;
     MovieReadProc* readProc;
     STRUCT_6B3690 field_8;
-    int fileHandle;
+    void* fileHandle;
     int field_18;
     SDL_Surface* field_24;
     SDL_Surface* field_28;
@@ -56,7 +56,7 @@ static void _MVE_MemInit(STRUCT_6B3690* a1, int a2, void* a3);
 static void _MVE_MemFree(STRUCT_6B3690* a1);
 static void _do_nothing_2(SDL_Surface* a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 static int _sub_4F4B5();
-static int _ioReset(int fileHandle);
+static int _ioReset(void* handle);
 static void* _ioRead(int size);
 static void* _MVE_MemAlloc(STRUCT_6B3690* a1, unsigned int a2);
 static unsigned char* _ioNextRecord();
@@ -393,7 +393,7 @@ static int _rm_dy;
 static int _gSoundTimeBase;
 
 // 0x6B39CC
-static int _io_handle;
+static void* _io_handle;
 
 // 0x6B39D0
 static int _rm_len;
@@ -639,7 +639,7 @@ void _MVE_rmFrameCounts(int* a1, int* a2)
 }
 
 // 0x4F4BF0
-int _MVE_rmPrepMovie(int fileHandle, int a2, int a3, char a4)
+int _MVE_rmPrepMovie(void* handle, int a2, int a3, char a4)
 {
     _sub_4F4DD();
 
@@ -651,7 +651,7 @@ int _MVE_rmPrepMovie(int fileHandle, int a2, int a3, char a4)
         _rm_track_bit = 1;
     }
 
-    if (!_ioReset(fileHandle)) {
+    if (!_ioReset(handle)) {
         _MVE_rmEndMovie();
         return -8;
     }
@@ -673,11 +673,11 @@ int _MVE_rmPrepMovie(int fileHandle, int a2, int a3, char a4)
 }
 
 // 0x4F4C90
-static int _ioReset(int stream)
+static int _ioReset(void* handle)
 {
     Mve* mve;
 
-    _io_handle = stream;
+    _io_handle = handle;
 
     mve = (Mve*)_ioRead(sizeof(Mve));
     if (mve == NULL) {

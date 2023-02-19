@@ -11,7 +11,6 @@
 #include "int/window.h"
 #include "movie_lib.h"
 #include "platform_compat.h"
-#include "pointer_registry.h"
 #include "plib/color/color.h"
 #include "plib/db/db.h"
 #include "plib/gnw/debug.h"
@@ -209,7 +208,6 @@ static DB_FILE* alphaHandle;
 static unsigned char* alphaBuf;
 
 static SDL_Surface* gMovieSdlSurface = NULL;
-static int gMovieFileStreamPointerKey = 0;
 
 // 0x4783F0
 void movieSetPreDrawFunc(MoviePreDrawFunc* func)
@@ -243,9 +241,9 @@ static void movieFree(void* ptr)
 }
 
 // 0x47843C
-static bool movieRead(int fileHandle, void* buf, int count)
+static bool movieRead(void* handle, void* buf, int count)
 {
-    return db_fread(buf, 1, count, (DB_FILE*)intToPtr(fileHandle)) == count;
+    return db_fread(buf, 1, count, reinterpret_cast<DB_FILE*>(handle)) == count;
 }
 
 // 0x478464
@@ -829,8 +827,6 @@ static int movieStart(int win, char* filePath, int (*a3)())
         return 1;
     }
 
-    gMovieFileStreamPointerKey = ptrToInt(handle);
-
     GNWWin = win;
     running = 1;
     movieFlags &= ~MOVIE_EXTENDED_FLAG_0x01;
@@ -858,7 +854,7 @@ static int movieStart(int win, char* filePath, int (*a3)())
         v15 = 0;
     }
 
-    _MVE_rmPrepMovie(gMovieFileStreamPointerKey, v15, v16, v17);
+    _MVE_rmPrepMovie(handle, v15, v16, v17);
 
     if (movieScaleFlag) {
         debug_printf("scaled\n");
