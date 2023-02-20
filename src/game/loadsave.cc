@@ -833,7 +833,7 @@ static int QuickSnapShot()
         ORIGINAL_ISO_WINDOW_WIDTH,
         ORIGINAL_ISO_WINDOW_HEIGHT,
         isoWindowWidth,
-        thumbnail_image[1],
+        snapshot,
         LS_PREVIEW_WIDTH,
         LS_PREVIEW_HEIGHT,
         LS_PREVIEW_WIDTH);
