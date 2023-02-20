@@ -2263,7 +2263,7 @@ void use_inventory_on(Object* a1)
                     if (immode == INVENTORY_WINDOW_CURSOR_ARROW) {
                         inven_action_cursor(keyCode, INVENTORY_WINDOW_TYPE_USE_ITEM_ON);
                     } else {
-                        int inventoryItemIndex = pud->length - (stack_offset[curr_stack] + keyCode - 1000 + 1);
+                        int inventoryItemIndex = stack_offset[curr_stack] + keyCode - 1000;
                         if (inventoryItemIndex < pud->length) {
                             InventoryItem* inventoryItem = &(pud->items[inventoryItemIndex]);
                             if (isInCombat()) {
