@@ -761,7 +761,7 @@ int game_handle_input(int eventCode, bool isInCombatMode)
                         char* time = game_time_hour_str();
 
                         char date[128];
-                        snprintf(date, sizeof(date), "%s: %d/%d %s", messageListItem.text, day, year, time);
+                        snprintf(date, sizeof(date), "%s %d, %d %s", messageListItem.text, day, year, time);
 
                         display_print(date);
                     }
