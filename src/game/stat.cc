@@ -55,7 +55,10 @@ static StatDescription stat_data[STAT_COUNT] = {
     { NULL, NULL, 24, 0, INT_MAX, 0 },
     { NULL, NULL, 25, 0, INT_MAX, 0 },
     { NULL, NULL, 26, 0, 100, 0 },
-    { NULL, NULL, 94, 0, 100, 0 },
+    // CE: Fix minimal value (on par with Fallout 2). This allows "Better
+    // Criticals" to be less than 0 (with Heavy Handed trait it's -30), so it
+    // can affect critical effect calculation in `attack_crit_success`.
+    { NULL, NULL, 94, -60, 100, 0 },
     { NULL, NULL, 0, 0, 100, 0 },
     { NULL, NULL, 0, 0, 100, 0 },
     { NULL, NULL, 0, 0, 100, 0 },
