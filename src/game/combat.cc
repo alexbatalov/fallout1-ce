@@ -4605,8 +4605,10 @@ void combat_outline_on()
         for (index = 0; index < critters_length; index++) {
             if (critters[index] != obj_dude && (critters[index]->data.critter.combat.results & DAM_DEAD) == 0) {
                 outline_type = OUTLINE_TYPE_HOSTILE;
-                if (critters[index]->data.critter.combat.team == obj_dude->data.critter.combat.team) {
-                    outline_type = OUTLINE_TYPE_FRIENDLY;
+                if (perk_level(PERK_FRIENDLY_FOE)) {
+                    if (critters[index]->data.critter.combat.team == obj_dude->data.critter.combat.team) {
+                        outline_type = OUTLINE_TYPE_FRIENDLY;
+                    }
                 }
 
                 obj_outline_object(critters[index], outline_type, NULL);
