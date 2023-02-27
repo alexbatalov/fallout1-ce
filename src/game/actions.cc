@@ -189,28 +189,33 @@ static int pick_death(Object* attacker, Object* defender, int damage, int damage
         }
     }
 
-    if ((anim == ANIM_THROW_PUNCH
-            || anim == ANIM_KICK_LEG
-            || anim == ANIM_THRUST_ANIM
-            || anim == ANIM_SWING_ANIM
-            || anim == ANIM_THROW_ANIM)
-        && violence_level == VIOLENCE_LEVEL_MAXIMUM_BLOOD
-        && has_bloody_mess) {
-        death_anim = ANIM_BIG_HOLE;
-    } else if (anim == ANIM_FIRE_SINGLE
-        && damage_type == DAMAGE_TYPE_NORMAL
-        && violence_level == VIOLENCE_LEVEL_MAXIMUM_BLOOD
-        && (has_bloody_mess || damage >= 45)) {
-        death_anim = ANIM_BIG_HOLE;
-    } else if (violence_level > VIOLENCE_LEVEL_NORMAL && (has_bloody_mess || damage >= 45)) {
-        death_anim = death_3[damage_type];
-        if (check_death(defender, death_anim, VIOLENCE_LEVEL_MAXIMUM_BLOOD, hit_from_front) != death_anim) {
-            death_anim = death_2[damage_type];
+    if (anim == ANIM_THROW_PUNCH
+        || anim == ANIM_KICK_LEG
+        || anim == ANIM_THRUST_ANIM
+        || anim == ANIM_SWING_ANIM
+        || anim == ANIM_THROW_ANIM) {
+        if (violence_level == VIOLENCE_LEVEL_MAXIMUM_BLOOD && has_bloody_mess) {
+            death_anim = ANIM_BIG_HOLE;
+        } else {
+            death_anim = ANIM_FALL_BACK;
         }
-    } else if (violence_level > VIOLENCE_LEVEL_MINIMAL && (has_bloody_mess || damage >= 15)) {
-        death_anim = death_2[damage_type];
+    } else if (anim == ANIM_FIRE_SINGLE && damage_type == DAMAGE_TYPE_NORMAL) {
+        if (violence_level == VIOLENCE_LEVEL_MAXIMUM_BLOOD && (has_bloody_mess || damage >= 45)) {
+            death_anim = ANIM_BIG_HOLE;
+        } else {
+            death_anim = ANIM_FALL_BACK;
+        }
     } else {
-        death_anim = ANIM_FALL_BACK;
+        if (violence_level > VIOLENCE_LEVEL_NORMAL && (has_bloody_mess || damage >= 45)) {
+            death_anim = death_3[damage_type];
+            if (check_death(defender, death_anim, VIOLENCE_LEVEL_MAXIMUM_BLOOD, hit_from_front) != death_anim) {
+                death_anim = death_2[damage_type];
+            }
+        } else if (violence_level > VIOLENCE_LEVEL_MINIMAL && (has_bloody_mess || damage >= 15)) {
+            death_anim = death_2[damage_type];
+        } else {
+            death_anim = ANIM_FALL_BACK;
+        }
     }
 
     if (!hit_from_front && death_anim == ANIM_FALL_BACK) {
