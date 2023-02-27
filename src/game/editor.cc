@@ -5518,7 +5518,7 @@ static int InputPDLoop(int count, void (*refreshProc)())
             rc = 1;
         } else if (keyCode == 501) {
             mouseGetPositionInWindow(pwin, &mouse_xpos, &mouse_ypos);
-            cline = (mouse_ypos - (PERK_WINDOW_Y + PERK_WINDOW_LIST_Y)) / v16;
+            cline = (mouse_ypos - PERK_WINDOW_LIST_Y) / v16;
             if (cline >= 0) {
                 if (count - 1 < cline)
                     cline = count - 1;
