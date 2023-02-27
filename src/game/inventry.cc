@@ -2266,21 +2266,7 @@ void use_inventory_on(Object* a1)
                         int inventoryItemIndex = stack_offset[curr_stack] + keyCode - 1000;
                         if (inventoryItemIndex < pud->length) {
                             InventoryItem* inventoryItem = &(pud->items[inventoryItemIndex]);
-                            if (isInCombat()) {
-                                if (obj_dude->data.critter.combat.ap >= 2) {
-                                    if (action_use_an_item_on_object(obj_dude, a1, inventoryItem->item) != -1) {
-                                        int actionPoints = obj_dude->data.critter.combat.ap;
-                                        if (actionPoints < 2) {
-                                            obj_dude->data.critter.combat.ap = 0;
-                                        } else {
-                                            obj_dude->data.critter.combat.ap = actionPoints - 2;
-                                        }
-                                        intface_update_move_points(obj_dude->data.critter.combat.ap);
-                                    }
-                                }
-                            } else {
-                                action_use_an_item_on_object(obj_dude, a1, inventoryItem->item);
-                            }
+                            action_use_an_item_on_object(stack[0], a1, inventoryItem->item);
                             keyCode = KEY_ESCAPE;
                         } else {
                             keyCode = -1;
