@@ -1563,7 +1563,7 @@ int item_w_called_shot(Object* critter, int hit_mode)
     if (damage_type == DAMAGE_TYPE_EXPLOSION
         || damage_type == DAMAGE_TYPE_FIRE
         || damage_type == DAMAGE_TYPE_EMP
-        || (damage_type == ANIM_THROW_ANIM && damage_type == DAMAGE_TYPE_PLASMA)) {
+        || (anim == ANIM_THROW_ANIM && damage_type == DAMAGE_TYPE_PLASMA)) {
         return 0;
     }
 
