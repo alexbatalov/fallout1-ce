@@ -1072,12 +1072,23 @@ static void op_animate_stand_reverse_obj(Program* program)
 static void op_animate_move_obj_to_tile(Program* program)
 {
     int flags = programStackPopInteger(program);
-    int tile = programStackPopInteger(program);
+    ProgramValue tileValue = programStackPopValue(program);
     Object* object = static_cast<Object*>(programStackPopPointer(program));
 
     if (object == NULL) {
         dbg_error(program, "animate_move_obj_to_tile", SCRIPT_ERROR_OBJECT_IS_NULL);
         return;
+    }
+
+    // CE: There is a bug in `sinthia` script. It's supposed that Sinthia moves
+    // to `dest_tile`, but this function is passed `self_obj` as tile.
+    int tile;
+    if (tileValue.opcode == VALUE_TYPE_INT) {
+        tile = tileValue.integerValue;
+    } else {
+        dbg_error(program, "animate_move_obj_to_tile", SCRIPT_ERROR_FOLLOWS);
+        debug_printf("Invalid tile type.");
+        tile = -1;
     }
 
     if (tile <= -1) {
