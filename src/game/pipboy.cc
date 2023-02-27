@@ -1587,21 +1587,16 @@ static int PrintAMelevList(int a1)
         }
     }
 
-    for (int map = 0; map < 5; map++) {
-        if (map == amcty_indx) {
-            continue;
-        }
-
-        if (get_map_idx_same(amcty_indx, map) == -1) {
-            continue;
-        }
-
-        for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
-            if (automapHeader->offsets[map][elevation] > 0) {
-                sortlist[line].name = map_get_elev_idx(map, elevation);
-                sortlist[line].value = elevation;
-                sortlist[line].field_6 = map;
-                line++;
+    for (int index = 0; index < 5; index++) {
+        int map = get_map_idx_same(amcty_indx, index);
+        if (map != -1) {
+            for (int elevation = 0; elevation < ELEVATION_COUNT; elevation++) {
+                if (automapHeader->offsets[map][elevation] > 0) {
+                    sortlist[line].name = map_get_elev_idx(map, elevation);
+                    sortlist[line].value = elevation;
+                    sortlist[line].field_6 = map;
+                    line++;
+                }
             }
         }
     }
