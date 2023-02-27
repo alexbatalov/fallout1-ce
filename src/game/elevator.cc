@@ -78,8 +78,8 @@ static const ElevatorBackground intotal[ELEVATOR_COUNT] = {
     /*                   GLOW_UPPER */ { 146, -1 },
     /*                   GLOW_LOWER */ { 146, 151 },
     /*                     VAULT_13 */ { 148, -1 },
-    /*                   NECROPOLIS */ { 146, -1 },
-    /*                     SIERRA_1 */ { 146, -1 },
+    /*                   NECROPOLIS */ { 148, -1 },
+    /*                     SIERRA_1 */ { 148, -1 },
     /*                     SIERRA_2 */ { 146, 152 },
 };
 
