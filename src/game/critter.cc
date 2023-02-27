@@ -1083,7 +1083,7 @@ bool is_pc_flag(int pc_flag)
 // 0x428A98
 int critter_sneak_check(Object* obj, void* data)
 {
-    sneak_working = skill_level(obj_dude, SKILL_SNEAK) >= ROLL_SUCCESS;
+    sneak_working = skill_result(obj_dude, SKILL_SNEAK, 0, NULL) >= ROLL_SUCCESS;
     queue_add(600, obj_dude, NULL, EVENT_TYPE_SNEAK);
     return 0;
 }
