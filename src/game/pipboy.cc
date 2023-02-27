@@ -2015,7 +2015,12 @@ static void AddHotLines(int start, int count, bool add_back_button)
 static void NixHotLines()
 {
     if (hot_line_count != 0) {
-        for (int index = hot_line_start; index < hot_line_start + hot_line_count; index++) {
+        int end = hot_line_start + hot_line_count;
+        if (end > 20) {
+            end = 20;
+        }
+
+        for (int index = hot_line_start; index < end; index++) {
             win_delete_button(HotLines[index]);
         }
     }
