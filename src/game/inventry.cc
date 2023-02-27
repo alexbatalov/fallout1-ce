@@ -207,7 +207,7 @@ static int inventry_msg_load();
 static int inventry_msg_unload();
 static void display_inventory_info(Object* item, int quantity, unsigned char* dest, int pitch, bool a5);
 static void inven_update_lighting(Object* a1);
-static int barter_compute_value(Object* a1, Object* a2);
+static int barter_compute_value(Object* buyer, Object* seller);
 static int barter_attempt_transaction(Object* a1, Object* a2, Object* a3, Object* a4);
 static void barter_move_inventory(Object* a1, int quantity, int a3, int a4, Object* a5, Object* a6, bool a7);
 static void barter_move_from_table_inventory(Object* a1, int quantity, int a3, Object* a4, Object* a5, bool a6);
@@ -4134,32 +4134,27 @@ int move_inventory(Object* a1, int a2, Object* a3, bool a4)
 }
 
 // 0x467AD0
-static int barter_compute_value(Object* a1, Object* a2)
+static int barter_compute_value(Object* buyer, Object* seller)
 {
-    int cost = item_total_cost(btable);
-    int caps = item_caps_total(btable);
-    int v14 = cost - caps;
+    int mod = 100;
 
-    double bonus = 0.0;
-    if (a1 == obj_dude) {
+    if (buyer == obj_dude) {
         if (perk_level(PERK_MASTER_TRADER)) {
-            bonus = 25.0;
+            mod += 25;
         }
     }
 
-    int partyBarter = skill_level(a1, SKILL_BARTER);
-    int npcBarter = skill_level(a2, SKILL_BARTER);
+    int buyer_mod = skill_level(buyer, SKILL_BARTER);
+    int seller_mod = skill_level(seller, SKILL_BARTER);
+    mod += buyer_mod - seller_mod + barter_mod;
 
-    // TODO: Check in debugger, complex math, probably uses floats, not doubles.
-    double v1 = (barter_mod + 100.0 - bonus) * 0.01;
-    double v2 = (160.0 + npcBarter) / (160.0 + partyBarter) * (v14 * 2.0);
-    if (v1 < 0) {
-        // TODO: Probably 0.01 as float.
-        v1 = 0.0099999998;
-    }
+    mod = std::clamp(mod, 10, 300);
 
-    int rounded = (int)(v1 * v2 + caps);
-    return rounded;
+    int cost = item_total_cost(btable);
+    int caps = item_caps_total(btable);
+
+    // Exclude caps before applying modifier (since it only affect items).
+    return 100 * (cost - caps) / mod + caps;
 }
 
 // 0x467B70
@@ -4526,13 +4521,13 @@ void barter_inventory(int win, Object* a2, Object* a3, Object* a4, int a5)
     int npcReactionType = reaction_to_level(npcReactionValue);
     switch (npcReactionType) {
     case NPC_REACTION_BAD:
-        modifier = 25;
+        modifier = -25;
         break;
     case NPC_REACTION_NEUTRAL:
         modifier = 0;
         break;
     case NPC_REACTION_GOOD:
-        modifier = -15;
+        modifier = 50;
         break;
     default:
         assert(false && "Should be unreachable");
