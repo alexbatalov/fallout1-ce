@@ -61,7 +61,6 @@ typedef struct ScriptState {
     STRUCT_664980 combatState1;
     STRUCT_664980 combatState2;
     int elevatorType;
-    int elevatorLevel;
     int explosionTile;
     int explosionElevation;
     int explosionMinDamage;
@@ -802,7 +801,7 @@ int scripts_check_state()
 
     if ((scriptState.requests & SCRIPT_REQUEST_ELEVATOR) != 0) {
         int map = map_data.field_34;
-        int elevation = scriptState.elevatorLevel;
+        int elevation = map_elevation;
         int tile = -1;
 
         scriptState.requests &= ~SCRIPT_REQUEST_ELEVATOR;
@@ -909,7 +908,7 @@ int scripts_check_state_in_combat()
 {
     if ((scriptState.requests & SCRIPT_REQUEST_ELEVATOR) != 0) {
         int map = map_data.field_34;
-        int elevation = scriptState.elevatorLevel;
+        int elevation = map_elevation;
         int tile = -1;
 
         if (elevator_select(scriptState.elevatorType, &map, &elevation, &tile) != -1) {
