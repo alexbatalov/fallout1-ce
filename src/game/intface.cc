@@ -1794,8 +1794,6 @@ static int intface_redraw_items()
                 int anim = item_w_anim(obj_dude, hitMode);
                 switch (anim) {
                 case ANIM_THROW_PUNCH:
-                    id = 42;
-                    break;
                 case ANIM_KICK_LEG:
                     id = 287;
                     break;
