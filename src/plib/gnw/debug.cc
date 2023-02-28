@@ -60,7 +60,7 @@ void debug_register_log(const char* fileName, const char* mode)
             fclose(fd);
         }
 
-        fd = fopen(fileName, mode);
+        fd = compat_fopen(fileName, mode);
         debug_func = debug_log;
     }
 }

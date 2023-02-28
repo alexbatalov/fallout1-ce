@@ -302,7 +302,7 @@ int db_dir_entry(const char* name, dir_entry* de)
         }
 
         if (v3) {
-            stream = fopen(path, "rb");
+            stream = compat_fopen(path, "rb");
         }
 
         if (stream != NULL) {
@@ -387,7 +387,7 @@ int db_read_to_buf(const char* filename, unsigned char* buf)
         }
 
         if (v3) {
-            stream = fopen(path, "rb");
+            stream = compat_fopen(path, "rb");
         }
 
         if (stream != NULL) {
@@ -602,7 +602,7 @@ DB_FILE* db_fopen(const char* filename, const char* mode)
         }
 
         if (v2) {
-            stream = fopen(path, mode);
+            stream = compat_fopen(path, mode);
         }
 
         if (stream != NULL) {
@@ -1708,7 +1708,7 @@ int db_get_file_list(const char* filespec, char*** filelist, char*** desclist, i
             if (db_findfirst(path, &find_data) == 0) {
                 do {
                     if (temp != NULL) {
-                        FILE* stream = fopen(fileFindGetName(&find_data), "rb");
+                        FILE* stream = compat_fopen(fileFindGetName(&find_data), "rb");
                         if (stream != NULL) {
                             if (fgets(temp, desclen, stream) != NULL) {
                                 temp[strlen(temp - 1)] = '\0';
@@ -1940,7 +1940,7 @@ static int db_init_database(DB_DATABASE* database, const char* datafile, const c
         return -1;
     }
 
-    database->stream = fopen(database->datafile, "rb");
+    database->stream = compat_fopen(database->datafile, "rb");
     if (database->stream == NULL) {
         internal_free(database->datafile);
         database->datafile = NULL;
@@ -2193,7 +2193,7 @@ static int db_fill_hash_table(DB_DATABASE* database, const char* path)
 
 #if defined(_WIN32)
     snprintf(pattern, sizeof(pattern), "%s%s", path, "*.*");
-#else 
+#else
     snprintf(pattern, sizeof(pattern), "%s%s", path, "*");
 #endif
     compat_windows_path_to_native(pattern);

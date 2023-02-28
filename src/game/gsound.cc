@@ -1811,7 +1811,7 @@ static int gsound_background_find_with_copy(char* dest, const char* src)
     char inPath[COMPAT_MAX_PATH];
     snprintf(inPath, sizeof(inPath), "%s%s%s", sound_music_path2, src, ".ACM");
 
-    FILE* inStream = fopen(inPath, "rb");
+    FILE* inStream = compat_fopen(inPath, "rb");
     if (inStream == NULL) {
         if (gsound_debug) {
             debug_printf("Unable to find music file %s to copy down.\n", src);
@@ -1820,7 +1820,7 @@ static int gsound_background_find_with_copy(char* dest, const char* src)
         return -1;
     }
 
-    FILE* outStream = fopen(outPath, "wb");
+    FILE* outStream = compat_fopen(outPath, "wb");
     if (outStream == NULL) {
         if (gsound_debug) {
             debug_printf("Unable to open music file %s for copying to.", src);
@@ -2140,7 +2140,7 @@ static Sound* gsound_get_sound_ready_for_effect()
 // 0x449E08
 static bool gsound_file_exists_f(const char* fname)
 {
-    FILE* f = fopen(fname, "rb");
+    FILE* f = compat_fopen(fname, "rb");
     if (f == NULL) {
         return false;
     }

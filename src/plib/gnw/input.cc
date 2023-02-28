@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "audio_engine.h"
+#include "platform_compat.h"
 #include "plib/color/color.h"
 #include "plib/gnw/button.h"
 #include "plib/gnw/dxinput.h"
@@ -507,7 +508,7 @@ int default_screendump(int width, int height, unsigned char* data, unsigned char
     for (index = 0; index < 100000; index++) {
         snprintf(fileName, sizeof(fileName), "scr%.5d.bmp", index);
 
-        stream = fopen(fileName, "rb");
+        stream = compat_fopen(fileName, "rb");
         if (stream == NULL) {
             break;
         }
@@ -519,7 +520,7 @@ int default_screendump(int width, int height, unsigned char* data, unsigned char
         return -1;
     }
 
-    stream = fopen(fileName, "wb");
+    stream = compat_fopen(fileName, "wb");
     if (stream == NULL) {
         return -1;
     }
