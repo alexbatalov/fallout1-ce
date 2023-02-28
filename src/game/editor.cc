@@ -1672,7 +1672,7 @@ static void DrawFolder()
         win_line(edit_win,
             34,
             y + text_height() / 2,
-            v4,
+            v4 + 34,
             y + text_height() / 2,
             colorTable[992]);
 
