@@ -2948,7 +2948,7 @@ static int compute_attack(Attack* attack)
 void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
 {
     // 0x56BD58
-    Attack temp_ctd;
+    static Attack temp_ctd;
 
     Object* attacker;
 
@@ -2962,58 +2962,53 @@ void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
         }
     }
 
-    int tile;
+    int origin_tile;
     if (attacker != NULL) {
-        tile = attacker->tile;
+        origin_tile = attacker->tile;
     } else {
-        tile = attack->tile;
+        origin_tile = attack->tile;
     }
 
-    if (tile == -1) {
-        debug_printf("\nError: compute_explosion_on_extras: Called with bad target/tileNum");
-        return;
-    }
-
-    // TODO: The math in this loop is rather complex and hard to understand.
-    int v20;
-    int v22 = 0;
+    int step;
+    int radius = 0;
     int rotation = 0;
-    int v5 = -1;
-    int v19 = tile;
+    int current_tile = -1;
+    int current_center_tile = origin_tile;
     while (attack->extrasLength < 6) {
-        if (v22 != 0 && (v5 == -1 || (v5 = tile_num_in_direction(v5, rotation, 1)) != v19)) {
-            v20++;
-            if (v20 % v22 == 0) {
+        if (radius != 0 && (current_tile = tile_num_in_direction(current_tile, rotation, 1)) != current_center_tile) {
+            step++;
+            if (step % radius == 0) {
                 rotation += 1;
                 if (rotation == ROTATION_COUNT) {
                     rotation = ROTATION_NE;
                 }
             }
         } else {
-            v22++;
-            // if (isGrenade && item_w_grenade_dmg_radius(attack->weapon) < v22) {
-            //     v5 = -1;
-            // } else if (isGrenade || item_w_rocket_dmg_radius(attack->weapon) >= v22) {
-            //     v5 = tile_num_in_direction(v19, ROTATION_NE, 1);
-            // } else {
-            //     v5 = -1;
-            // }
+            radius++;
 
-            v19 = v5;
+            if (isGrenade && radius > 2) {
+                current_tile = -1;
+            } else if (!isGrenade && radius > 3) {
+                current_tile = -1;
+            } else {
+                current_tile = tile_num_in_direction(current_center_tile, ROTATION_NE, 1);
+            }
+
+            current_center_tile = current_tile;
             rotation = ROTATION_SE;
-            v20 = 0;
+            step = 0;
         }
 
-        if (v5 == -1) {
+        if (current_tile == -1) {
             break;
         }
 
-        Object* obstacle = obj_blocking_at(attacker, v5, attack->attacker->elevation);
+        Object* obstacle = obj_blocking_at(attacker, current_tile, attack->attacker->elevation);
         if (obstacle != NULL
             && FID_TYPE(obstacle->fid) == OBJ_TYPE_CRITTER
             && (obstacle->data.critter.combat.results & DAM_DEAD) == 0
             && (obstacle->flags & OBJECT_SHOOT_THRU) == 0
-            && !combat_is_shot_blocked(obstacle, obstacle->tile, tile, NULL, NULL)) {
+            && !combat_is_shot_blocked(obstacle, obstacle->tile, origin_tile, NULL, NULL)) {
             if (obstacle == attack->attacker) {
                 attack->attackerFlags &= ~DAM_HIT;
                 compute_damage(attack, 1, 2);
