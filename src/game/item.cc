@@ -1398,9 +1398,7 @@ int item_w_mp_cost(Object* critter, int hit_mode, bool aiming)
 
         if (critter == obj_dude) {
             if (trait_level(TRAIT_FAST_SHOT)) {
-                if (item_w_range(critter, hit_mode) > 2) {
-                    action_points -= 1;
-                }
+                action_points -= 1;
             }
         }
     }
