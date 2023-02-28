@@ -282,8 +282,8 @@ static void movie_MVE_ShowFrame(SDL_Surface* surface, int srcWidth, int srcHeigh
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
         }
-        destRect.w = destWidth + destRect.x;
-        destRect.h = destHeight + destRect.y;
+        destRect.w = destWidth;
+        destRect.h = destHeight;
     }
 
     lastMovieSX = srcX;
@@ -683,7 +683,7 @@ static DB_FILE* openFile(char* filePath)
 // 0x479184
 static void openSubtitle(char* filePath)
 {
-    subtitleW = windowGetXres();
+    subtitleW = win_width(GNWWin);
     subtitleH = text_height() + 4;
 
     if (subtitleFilenameFunc != NULL) {
