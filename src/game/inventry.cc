@@ -2314,7 +2314,7 @@ Object* inven_right_hand(Object* critter)
     Inventory* inventory;
     Object* item;
 
-    if (i_rhand != NULL) {
+    if (i_rhand != NULL && critter == inven_dude) {
         return i_rhand;
     }
 
@@ -2336,7 +2336,7 @@ Object* inven_left_hand(Object* critter)
     Inventory* inventory;
     Object* item;
 
-    if (i_lhand != NULL) {
+    if (i_lhand != NULL && critter == inven_dude) {
         return i_lhand;
     }
 
@@ -2358,7 +2358,7 @@ Object* inven_worn(Object* critter)
     Inventory* inventory;
     Object* item;
 
-    if (i_worn != NULL) {
+    if (i_worn != NULL && critter == inven_dude) {
         return i_worn;
     }
 
