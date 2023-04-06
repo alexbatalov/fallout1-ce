@@ -5,8 +5,8 @@
 
 namespace fallout {
 
-// The maximum number of buttons in one radio group.
-#define RADIO_GROUP_BUTTON_LIST_CAPACITY 64
+// The maximum number of buttons in one button group.
+#define BUTTON_GROUP_BUTTON_LIST_CAPACITY 64
 
 typedef enum WindowFlags {
     // Use system window flags which are set during game startup and does not
@@ -32,25 +32,26 @@ typedef enum ButtonFlags {
     BUTTON_FLAG_0x10 = 0x10,
     BUTTON_FLAG_TRANSPARENT = 0x20,
     BUTTON_FLAG_0x40 = 0x40,
-    BUTTON_FLAG_0x010000 = 0x010000,
-    BUTTON_FLAG_0x020000 = 0x020000,
-    BUTTON_FLAG_0x040000 = 0x040000,
+    BUTTON_FLAG_GRAPHIC = 0x010000,
+    BUTTON_FLAG_CHECKED = 0x020000,
+    BUTTON_FLAG_RADIO = 0x040000,
     BUTTON_FLAG_RIGHT_MOUSE_BUTTON_CONFIGURED = 0x080000,
 } ButtonFlags;
 
 typedef struct Button Button;
-typedef struct RadioGroup RadioGroup;
+typedef struct ButtonGroup ButtonGroup;
 
 typedef void WindowBlitProc(unsigned char* src, int width, int height, int srcPitch, unsigned char* dest, int destPitch);
 typedef void ButtonCallback(int btn, int keyCode);
+typedef void RadioButtonCallback(int btn);
 
 typedef struct MenuPulldown {
     Rect rect;
     int keyCode;
     int itemsLength;
     char** items;
-    int field_1C;
-    int field_20;
+    int foregroundColor;
+    int backgroundColor;
 } MenuPulldown;
 
 typedef struct MenuBar {
@@ -58,7 +59,7 @@ typedef struct MenuBar {
     Rect rect;
     int pulldownsLength;
     MenuPulldown pulldowns[15];
-    int borderColor;
+    int foregroundColor;
     int backgroundColor;
 } MenuBar;
 
@@ -103,20 +104,20 @@ typedef struct Button {
     ButtonCallback* leftMouseUpProc;
     ButtonCallback* rightMouseDownProc;
     ButtonCallback* rightMouseUpProc;
-    ButtonCallback* onPressed;
-    ButtonCallback* onUnpressed;
-    RadioGroup* radioGroup;
+    ButtonCallback* pressSoundFunc;
+    ButtonCallback* releaseSoundFunc;
+    ButtonGroup* buttonGroup;
     Button* prev;
     Button* next;
 } Button;
 
-typedef struct RadioGroup {
-    int field_0;
-    int field_4;
-    void (*field_8)(int);
+typedef struct ButtonGroup {
+    int maxChecked;
+    int currChecked;
+    RadioButtonCallback* func;
     int buttonsLength;
-    Button* buttons[RADIO_GROUP_BUTTON_LIST_CAPACITY];
-} RadioGroup;
+    Button* buttons[BUTTON_GROUP_BUTTON_LIST_CAPACITY];
+} ButtonGroup;
 
 } // namespace fallout
 

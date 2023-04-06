@@ -8,11 +8,6 @@
 
 namespace fallout {
 
-#define MAX_WINDOW_COUNT (50)
-
-// The maximum number of radio groups.
-#define RADIO_GROUP_LIST_CAPACITY (64)
-
 typedef enum WindowManagerErr {
     WINDOW_MANAGER_OK = 0,
     WINDOW_MANAGER_ERR_INITIALIZING_VIDEO_MODE = 1,
@@ -45,18 +40,18 @@ extern void* GNW_texture;
 int win_init(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitProc* videoSystemExitProc, int a3);
 int win_active();
 void win_exit(void);
-int win_add(int x, int y, int width, int height, int a4, int flags);
+int win_add(int x, int y, int width, int height, int color, int flags);
 void win_delete(int win);
 void win_buffering(bool a1);
 void win_border(int win);
 void win_no_texture();
 void win_set_bk_color(int color);
-void win_print(int win, const char* str, int a3, int x, int y, int a6);
-void win_text(int win, char** fileNameList, int fileNameListLength, int maxWidth, int x, int y, int flags);
+void win_print(int win, const char* str, int width, int x, int y, int color);
+void win_text(int win, char** fileNameList, int fileNameListLength, int maxWidth, int x, int y, int color);
 void win_line(int win, int left, int top, int right, int bottom, int color);
 void win_box(int win, int left, int top, int right, int bottom, int color);
 void win_shaded_box(int id, int ulx, int uly, int lrx, int lry, int color1, int color2);
-void win_fill(int win, int x, int y, int width, int height, int a6);
+void win_fill(int win, int x, int y, int width, int height, int color);
 void win_show(int win);
 void win_hide(int win);
 void win_move(int win_index, int x, int y);

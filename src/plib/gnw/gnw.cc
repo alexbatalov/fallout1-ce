@@ -18,6 +18,8 @@
 
 namespace fallout {
 
+#define MAX_WINDOW_COUNT 50
+
 static void win_free(int win);
 static void win_clip(Window* window, RectPtr* rectListNodePtr, unsigned char* a3);
 static void refresh_all(Rect* rect, unsigned char* a2);
@@ -497,15 +499,12 @@ void win_set_bk_color(int color)
 }
 
 // 0x4C2908
-void win_print(int win, const char* str, int a3, int x, int y, int a6)
+void win_print(int win, const char* str, int width, int x, int y, int color)
 {
-    int v7;
-    int v14;
     unsigned char* buf;
-    int v27;
+    int textColor;
 
     Window* w = GNW_find(win);
-    v7 = a3;
 
     if (!GNW_win_init_flag) {
         return;
@@ -515,59 +514,58 @@ void win_print(int win, const char* str, int a3, int x, int y, int a6)
         return;
     }
 
-    if (a3 == 0) {
-        if (a6 & 0x040000) {
-            v7 = text_mono_width(str);
+    if (width == 0) {
+        if (color & 0x040000) {
+            width = text_mono_width(str);
         } else {
-            v7 = text_width(str);
+            width = text_width(str);
         }
     }
 
-    if (v7 + x > w->width) {
-        if (!(a6 & 0x04000000)) {
+    if (width + x > w->width) {
+        if (!(color & 0x04000000)) {
             return;
         }
 
-        v7 = w->width - x;
+        width = w->width - x;
     }
 
     buf = w->buffer + x + y * w->width;
 
-    v14 = text_height();
-    if (v14 + y > w->height) {
+    if (text_height() + y > w->height) {
         return;
     }
 
-    if (!(a6 & 0x02000000)) {
+    if (!(color & 0x02000000)) {
         if (w->color == 256 && GNW_texture != NULL) {
-            buf_texture(buf, v7, text_height(), w->width, GNW_texture, w->tx + x, w->ty + y);
+            buf_texture(buf, width, text_height(), w->width, GNW_texture, w->tx + x, w->ty + y);
         } else {
-            buf_fill(buf, v7, text_height(), w->width, w->color);
+            buf_fill(buf, width, text_height(), w->width, w->color);
         }
     }
 
-    if ((a6 & 0xFF00) != 0) {
-        int colorIndex = (a6 & 0xFF) - 1;
-        v27 = (a6 & ~0xFFFF) | colorTable[GNW_wcolor[colorIndex]];
+    if ((color & 0xFF00) != 0) {
+        int colorIndex = (color & 0xFF) - 1;
+        textColor = (color & ~0xFFFF) | colorTable[GNW_wcolor[colorIndex]];
     } else {
-        v27 = a6;
+        textColor = color;
     }
 
-    text_to_buf(buf, str, v7, w->width, v27);
+    text_to_buf(buf, str, width, w->width, textColor);
 
-    if (a6 & 0x01000000) {
+    if (color & 0x01000000) {
         // TODO: Check.
         Rect rect;
         rect.ulx = w->rect.ulx + x;
         rect.uly = w->rect.uly + y;
-        rect.lrx = rect.ulx + v7;
+        rect.lrx = rect.ulx + width;
         rect.lry = rect.uly + text_height();
         GNW_win_refresh(w, &rect, NULL);
     }
 }
 
 // 0x4C2A98
-void win_text(int win, char** fileNameList, int fileNameListLength, int maxWidth, int x, int y, int flags)
+void win_text(int win, char** fileNameList, int fileNameListLength, int maxWidth, int x, int y, int color)
 {
     Window* w = GNW_find(win);
 
@@ -591,7 +589,7 @@ void win_text(int win, char** fileNameList, int fileNameListLength, int maxWidth
     for (int index = 0; index < fileNameListLength; index++) {
         char* fileName = fileNameList[index];
         if (*fileName != '\0') {
-            win_print(win, fileName, maxWidth, x, y, flags);
+            win_print(win, fileName, maxWidth, x, y, color);
         } else {
             if (maxWidth != 0) {
                 draw_line(ptr, width, 0, v1, v3, v1, colorTable[GNW_wcolor[2]]);
@@ -683,7 +681,7 @@ void win_shaded_box(int id, int ulx, int uly, int lrx, int lry, int color1, int 
 }
 
 // 0x4C2D84
-void win_fill(int win, int x, int y, int width, int height, int a6)
+void win_fill(int win, int x, int y, int width, int height, int color)
 {
     Window* w = GNW_find(win);
 
@@ -695,19 +693,19 @@ void win_fill(int win, int x, int y, int width, int height, int a6)
         return;
     }
 
-    if (a6 == 256) {
+    if (color == 256) {
         if (GNW_texture != NULL) {
             buf_texture(w->buffer + w->width * y + x, width, height, w->width, GNW_texture, x + w->tx, y + w->ty);
         } else {
-            a6 = colorTable[GNW_wcolor[0]] & 0xFF;
+            color = colorTable[GNW_wcolor[0]] & 0xFF;
         }
-    } else if ((a6 & 0xFF00) != 0) {
-        int colorIndex = (a6 & 0xFF) - 1;
-        a6 = (a6 & ~0xFFFF) | colorTable[GNW_wcolor[colorIndex]];
+    } else if ((color & 0xFF00) != 0) {
+        int colorIndex = (color & 0xFF) - 1;
+        color = (color & ~0xFFFF) | colorTable[GNW_wcolor[colorIndex]];
     }
 
-    if (a6 < 256) {
-        buf_fill(w->buffer + w->width * y + x, width, height, w->width, a6);
+    if (color < 256) {
+        buf_fill(w->buffer + w->width * y + x, width, height, w->width, color);
     }
 }
 

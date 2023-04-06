@@ -16,16 +16,16 @@
 
 namespace fallout {
 
-static int create_pull_down(char** stringList, int stringListLength, int x, int y, int a5, int a6, Rect* rect);
+static int create_pull_down(char** stringList, int stringListLength, int x, int y, int foregroundColor, int backgroundColor, Rect* rect);
 static void win_debug_delete(int btn, int keyCode);
 static int find_first_letter(int ch, char** stringList, int stringListLength);
-static int process_pull_down(int win, Rect* rect, char** items, int itemsLength, int a5, int a6, MenuBar* menuBar, int pulldownIndex);
-static int calc_max_field_chars_wcursor(int a1, int a2);
+static int process_pull_down(int win, Rect* rect, char** items, int itemsLength, int foregroundColor, int backgroundColor, MenuBar* menuBar, int pulldownIndex);
+static int calc_max_field_chars_wcursor(int value1, int value2);
 static void tm_watch_msgs();
 static void tm_kill_msg();
-static void tm_kill_out_of_order(int a1);
+static void tm_kill_out_of_order(int queueIndex);
 static void tm_click_response(int btn);
-static int tm_index_active(int a1);
+static int tm_index_active(int queueIndex);
 
 // 0x53A268
 static int wd = -1;
@@ -68,13 +68,13 @@ static int scr_center_x;
 static int tm_add;
 
 // 0x4C6AA0
-int win_list_select(const char* title, char** fileList, int fileListLength, SelectFunc* callback, int x, int y, int a7)
+int win_list_select(const char* title, char** fileList, int fileListLength, SelectFunc* callback, int x, int y, int color)
 {
-    return win_list_select_at(title, fileList, fileListLength, callback, x, y, a7, 0);
+    return win_list_select_at(title, fileList, fileListLength, callback, x, y, color, 0);
 }
 
 // 0x4C6AEC
-int win_list_select_at(const char* title, char** items, int itemsLength, SelectFunc* callback, int x, int y, int a7, int a8)
+int win_list_select_at(const char* title, char** items, int itemsLength, SelectFunc* callback, int x, int y, int color, int start)
 {
     if (!GNW_win_init_flag) {
         return -1;
@@ -159,8 +159,8 @@ int win_list_select_at(const char* title, char** items, int itemsLength, SelectF
         windowWidth,
         colorTable[GNW_wcolor[0]]);
 
-    int scrollOffset = a8;
-    if (a8 < 0 || a8 >= itemsLength) {
+    int scrollOffset = start;
+    if (start < 0 || start >= itemsLength) {
         scrollOffset = 0;
     }
 
@@ -178,14 +178,13 @@ int win_list_select_at(const char* title, char** items, int itemsLength, SelectF
         selectedItemIndex = 0;
     }
 
-    char** itemsTO = items + a8;
     win_text(win,
-        items + a8,
+        items + start,
         itemsLength < listViewCapacity ? itemsLength : listViewCapacity,
         listViewWidth,
         listViewX,
         listViewY,
-        a7 | 0x2000000);
+        color | 0x2000000);
 
     lighten_buf(listViewBuffer + windowWidth * selectedItemIndex * text_height(),
         listViewWidth,
@@ -441,7 +440,7 @@ int win_list_select_at(const char* title, char** items, int itemsLength, SelectF
                 listViewWidth,
                 listViewX,
                 listViewY,
-                a7 | 0x2000000);
+                color | 0x2000000);
 
             lighten_buf(listViewBuffer + windowWidth * selectedItemIndex * text_height(),
                 listViewWidth,
@@ -489,19 +488,19 @@ int win_list_select_at(const char* title, char** items, int itemsLength, SelectF
                     windowWidth,
                     colorTable[GNW_wcolor[0]]);
 
-                int color;
-                if ((a7 & 0xFF00) != 0) {
-                    int colorIndex = (a7 & 0xFF) - 1;
-                    color = (a7 & ~0xFFFF) | colorTable[GNW_wcolor[colorIndex]];
+                int textColor;
+                if ((color & 0xFF00) != 0) {
+                    int colorIndex = (color & 0xFF) - 1;
+                    textColor = (color & ~0xFFFF) | colorTable[GNW_wcolor[colorIndex]];
                 } else {
-                    color = a7;
+                    textColor = color;
                 }
 
                 text_to_buf(listViewBuffer + windowWidth * previousSelectedItemIndex * text_height(),
                     items[scrollOffset + previousSelectedItemIndex],
                     windowWidth,
                     windowWidth,
-                    color);
+                    textColor);
 
                 GNW_win_refresh(window, &itemRect, NULL);
             }
@@ -608,7 +607,7 @@ int win_get_str(char* dest, int length, const char* title, int x, int y)
 }
 
 // 0x4C7E78
-int win_msg(const char* string, int x, int y, int flags)
+int win_msg(const char* string, int x, int y, int color)
 {
     if (!GNW_win_init_flag) {
         return -1;
@@ -633,16 +632,16 @@ int win_msg(const char* string, int x, int y, int flags)
     Window* window = GNW_find(win);
     unsigned char* windowBuffer = window->buffer;
 
-    int color;
-    if ((flags & 0xFF00) != 0) {
-        int index = (flags & 0xFF) - 1;
-        color = colorTable[GNW_wcolor[index]];
-        color |= flags & ~0xFFFF;
+    int textColor;
+    if ((color & 0xFF00) != 0) {
+        int index = (color & 0xFF) - 1;
+        textColor = colorTable[GNW_wcolor[index]];
+        textColor |= color & ~0xFFFF;
     } else {
-        color = flags;
+        textColor = color;
     }
 
-    text_to_buf(windowBuffer + windowWidth * 8 + 16, string, windowWidth, windowWidth, color);
+    text_to_buf(windowBuffer + windowWidth * 8 + 16, string, windowWidth, windowWidth, textColor);
 
     win_register_text_button(win,
         windowWidth / 2 - 32,
@@ -668,23 +667,23 @@ int win_msg(const char* string, int x, int y, int flags)
 }
 
 // 0x4C7FA4
-int win_pull_down(char** items, int itemsLength, int x, int y, int a5)
+int win_pull_down(char** items, int itemsLength, int x, int y, int color)
 {
     if (!GNW_win_init_flag) {
         return -1;
     }
 
     Rect rect;
-    int win = create_pull_down(items, itemsLength, x, y, a5, colorTable[GNW_wcolor[0]], &rect);
+    int win = create_pull_down(items, itemsLength, x, y, color, colorTable[GNW_wcolor[0]], &rect);
     if (win == -1) {
         return -1;
     }
 
-    return process_pull_down(win, &rect, items, itemsLength, a5, colorTable[GNW_wcolor[0]], NULL, -1);
+    return process_pull_down(win, &rect, items, itemsLength, color, colorTable[GNW_wcolor[0]], NULL, -1);
 }
 
 // 0x4C8014
-static int create_pull_down(char** stringList, int stringListLength, int x, int y, int a5, int a6, Rect* rect)
+static int create_pull_down(char** stringList, int stringListLength, int x, int y, int foregroundColor, int backgroundColor, Rect* rect)
 {
     int windowHeight = stringListLength * text_height() + 16;
     int windowWidth = win_width_needed(stringList, stringListLength) + 4;
@@ -692,14 +691,14 @@ static int create_pull_down(char** stringList, int stringListLength, int x, int 
         return -1;
     }
 
-    int win = win_add(x, y, windowWidth, windowHeight, a6, WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
+    int win = win_add(x, y, windowWidth, windowHeight, backgroundColor, WINDOW_MODAL | WINDOW_MOVE_ON_TOP);
     if (win == -1) {
         return -1;
     }
 
-    win_text(win, stringList, stringListLength, windowWidth - 4, 2, 8, a5);
+    win_text(win, stringList, stringListLength, windowWidth - 4, 2, 8, foregroundColor);
     win_box(win, 0, 0, windowWidth - 1, windowHeight - 1, colorTable[0]);
-    win_box(win, 1, 1, windowWidth - 2, windowHeight - 2, a5);
+    win_box(win, 1, 1, windowWidth - 2, windowHeight - 2, foregroundColor);
     win_draw(win);
     win_get_rect(win, rect);
 
@@ -707,7 +706,7 @@ static int create_pull_down(char** stringList, int stringListLength, int x, int 
 }
 
 // 0x4C80E4
-static int process_pull_down(int win, Rect* rect, char** items, int itemsLength, int a5, int a6, MenuBar* menuBar, int pulldownIndex)
+static int process_pull_down(int win, Rect* rect, char** items, int itemsLength, int foregroundColor, int backgroundColor, MenuBar* menuBar, int pulldownIndex)
 {
     // TODO: Incomplete.
     return -1;
@@ -843,7 +842,7 @@ static void win_debug_delete(int btn, int keyCode)
 }
 
 // 0x4C8A54
-int win_register_menu_bar(int win, int x, int y, int width, int height, int borderColor, int backgroundColor)
+int win_register_menu_bar(int win, int x, int y, int width, int height, int foregroundColor, int backgroundColor)
 {
     Window* window = GNW_find(win);
 
@@ -880,17 +879,17 @@ int win_register_menu_bar(int win, int x, int y, int width, int height, int bord
     menuBar->rect.lrx = right - 1;
     menuBar->rect.lry = bottom - 1;
     menuBar->pulldownsLength = 0;
-    menuBar->borderColor = borderColor;
+    menuBar->foregroundColor = foregroundColor;
     menuBar->backgroundColor = backgroundColor;
 
     win_fill(win, x, y, width, height, backgroundColor);
-    win_box(win, x, y, right - 1, bottom - 1, borderColor);
+    win_box(win, x, y, right - 1, bottom - 1, foregroundColor);
 
     return 0;
 }
 
 // 0x4C8B48
-int win_register_menu_pulldown(int win, int x, char* title, int keyCode, int itemsLength, char** items, int a7, int a8)
+int win_register_menu_pulldown(int win, int x, char* title, int keyCode, int itemsLength, char** items, int foregroundColor, int backgroundColor)
 {
     Window* window = GNW_find(win);
 
@@ -930,7 +929,7 @@ int win_register_menu_pulldown(int win, int x, char* title, int keyCode, int ite
         return -1;
     }
 
-    win_print(win, title, 0, titleX, titleY, window->menuBar->borderColor | 0x2000000);
+    win_print(win, title, 0, titleX, titleY, window->menuBar->foregroundColor | 0x2000000);
 
     MenuPulldown* pulldown = &(window->menuBar->pulldowns[window->menuBar->pulldownsLength]);
     pulldown->rect.ulx = titleX;
@@ -940,8 +939,8 @@ int win_register_menu_pulldown(int win, int x, char* title, int keyCode, int ite
     pulldown->keyCode = keyCode;
     pulldown->itemsLength = itemsLength;
     pulldown->items = items;
-    pulldown->field_1C = a7;
-    pulldown->field_20 = a8;
+    pulldown->foregroundColor = foregroundColor;
+    pulldown->backgroundColor = backgroundColor;
 
     window->menuBar->pulldownsLength++;
 
@@ -996,15 +995,15 @@ int GNW_process_menu(MenuBar* menuBar, int pulldownIndex)
             pulldown->itemsLength,
             pulldown->rect.ulx,
             menuBar->rect.lry + 1,
-            pulldown->field_1C,
-            pulldown->field_20,
+            pulldown->foregroundColor,
+            pulldown->backgroundColor,
             &rect);
         if (win == -1) {
             curr_menu = NULL;
             return -1;
         }
 
-        keyCode = process_pull_down(win, &rect, pulldown->items, pulldown->itemsLength, pulldown->field_1C, pulldown->field_20, menuBar, pulldownIndex);
+        keyCode = process_pull_down(win, &rect, pulldown->items, pulldown->itemsLength, pulldown->foregroundColor, pulldown->backgroundColor, menuBar, pulldownIndex);
         if (keyCode < -1) {
             pulldownIndex = -2 - keyCode;
         }
@@ -1166,20 +1165,20 @@ int win_input_str(int win, char* dest, int maxLength, int x, int y, int textColo
     return 0;
 }
 
-// Calculates max length of string needed to represent a1 or a2.
+// Calculates max length of string needed to represent value1 or value2.
 //
 // 0x4C941C
-static int calc_max_field_chars_wcursor(int a1, int a2)
+static int calc_max_field_chars_wcursor(int value1, int value2)
 {
     char* str = (char*)mem_malloc(17);
     if (str == NULL) {
         return -1;
     }
 
-    snprintf(str, 17, "%d", a1);
+    snprintf(str, 17, "%d", value1);
     int len1 = strlen(str);
 
-    snprintf(str, 17, "%d", a2);
+    snprintf(str, 17, "%d", value2);
     int len2 = strlen(str);
 
     mem_free(str);
@@ -1276,7 +1275,7 @@ static void tm_kill_msg()
 }
 
 // 0x4C9B20
-static void tm_kill_out_of_order(int a1)
+static void tm_kill_out_of_order(int queueIndex)
 {
     int v7;
     int v6;
@@ -1285,16 +1284,16 @@ static void tm_kill_out_of_order(int a1)
         return;
     }
 
-    if (!tm_index_active(a1)) {
+    if (!tm_index_active(queueIndex)) {
         return;
     }
 
-    win_delete(tm_queue[a1].id);
+    win_delete(tm_queue[queueIndex].id);
 
-    tm_location[tm_queue[a1].location].taken = 0;
+    tm_location[tm_queue[queueIndex].location].taken = 0;
 
-    if (a1 != tm_kill) {
-        v6 = a1;
+    if (queueIndex != tm_kill) {
+        v6 = queueIndex;
         do {
             v7 = v6 - 1;
             if (v7 < 0) {
@@ -1321,35 +1320,35 @@ static void tm_kill_out_of_order(int a1)
 static void tm_click_response(int btn)
 {
     int win;
-    int v3;
+    int queueIndex;
 
     if (tm_kill == -1) {
         return;
     }
 
     win = win_button_winID(btn);
-    v3 = tm_kill;
-    while (win != tm_queue[v3].id) {
-        v3++;
-        if (v3 == 5) {
-            v3 = 0;
+    queueIndex = tm_kill;
+    while (win != tm_queue[queueIndex].id) {
+        queueIndex++;
+        if (queueIndex == 5) {
+            queueIndex = 0;
         }
 
-        if (v3 == tm_kill || !tm_index_active(v3))
+        if (queueIndex == tm_kill || !tm_index_active(queueIndex))
             return;
     }
 
-    tm_kill_out_of_order(v3);
+    tm_kill_out_of_order(queueIndex);
 }
 
 // 0x4C9C48
-static int tm_index_active(int a1)
+static int tm_index_active(int queueIndex)
 {
     if (tm_kill != tm_add) {
         if (tm_kill >= tm_add) {
-            if (a1 >= tm_add && a1 < tm_kill)
+            if (queueIndex >= tm_add && queueIndex < tm_kill)
                 return 0;
-        } else if (a1 < tm_kill || a1 >= tm_add) {
+        } else if (queueIndex < tm_kill || queueIndex >= tm_add) {
             return 0;
         }
     }
