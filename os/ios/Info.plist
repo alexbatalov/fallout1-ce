@@ -22,8 +22,6 @@
     <string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
     <key>CFBundleVersion</key>
     <string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
-    <key>LSApplicationCategoryType</key>
-    <string>public.app-category.role-playing-games</string>
     <key>LSMinimumSystemVersion</key>
     <string>11.0</string>
     <key>LSRequiresIPhoneOS</key>
@@ -32,11 +30,6 @@
     <string>True</string>
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
-    <key>UIDeviceFamily</key>
-    <array>
-        <integer>1</integer>
-        <integer>2</integer>
-    </array>
     <key>UIFileSharingEnabled</key>
     <true/>
     <key>UILaunchStoryboardName</key>
