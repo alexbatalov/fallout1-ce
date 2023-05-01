@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key>
-    <string>English</string>
+    <string>en</string>
     <key>CFBundleDisplayName</key>
     <string>${MACOSX_BUNDLE_DISPLAY_NAME}</string>
     <key>CFBundleExecutable</key>
@@ -28,6 +28,8 @@
     <string>${MACOSX_BUNDLE_COPYRIGHT}</string>
     <key>NSHighResolutionCapable</key>
     <string>True</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.role-playing-games</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.11</string>
     <key>SDL_FILESYSTEM_BASE_DIR_TYPE</key>
