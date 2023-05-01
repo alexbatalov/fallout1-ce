@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #else
+#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
@@ -219,6 +220,7 @@ int compat_mkdir(const char* path)
     char nativePath[COMPAT_MAX_PATH];
     strcpy(nativePath, path);
     compat_windows_path_to_native(nativePath);
+    compat_resolve_path(nativePath);
 
 #ifdef _WIN32
     return mkdir(nativePath);
@@ -243,6 +245,7 @@ FILE* compat_fopen(const char* path, const char* mode)
     char nativePath[COMPAT_MAX_PATH];
     strcpy(nativePath, path);
     compat_windows_path_to_native(nativePath);
+    compat_resolve_path(nativePath);
     return fopen(nativePath, mode);
 }
 
@@ -251,6 +254,7 @@ int compat_remove(const char* path)
     char nativePath[COMPAT_MAX_PATH];
     strcpy(nativePath, path);
     compat_windows_path_to_native(nativePath);
+    compat_resolve_path(nativePath);
     return remove(nativePath);
 }
 
@@ -259,10 +263,12 @@ int compat_rename(const char* oldFileName, const char* newFileName)
     char nativeOldFileName[COMPAT_MAX_PATH];
     strcpy(nativeOldFileName, oldFileName);
     compat_windows_path_to_native(nativeOldFileName);
+    compat_resolve_path(nativeOldFileName);
 
     char nativeNewFileName[COMPAT_MAX_PATH];
     strcpy(nativeNewFileName, newFileName);
     compat_windows_path_to_native(nativeNewFileName);
+    compat_resolve_path(nativeNewFileName);
 
     return rename(nativeOldFileName, nativeNewFileName);
 }
@@ -276,6 +282,60 @@ void compat_windows_path_to_native(char* path)
             *pch = '/';
         }
         pch++;
+    }
+#endif
+}
+
+void compat_resolve_path(char* path)
+{
+#ifndef _WIN32
+    char* pch = path;
+
+    DIR *dir;
+    if (pch[0] == '/') {
+        dir = opendir("/");
+        pch++;
+    } else {
+        dir = opendir(".");
+    }
+
+    while (dir != NULL) {
+        char* sep = strchr(pch, '/');
+        size_t length;
+        if (sep != NULL) {
+            length = sep - pch;
+        } else {
+            length = strlen(pch);
+        }
+
+        bool found = false;
+
+        struct dirent* entry = readdir(dir);
+        while (entry != NULL) {
+            if (strlen(entry->d_name) == length && compat_strnicmp(pch, entry->d_name, length) == 0) {
+                strncpy(pch, entry->d_name, length);
+                found = true;
+                break;
+            }
+            entry = readdir(dir);
+        }
+
+        closedir(dir);
+        dir = NULL;
+
+        if (!found) {
+            break;
+        }
+
+        if (sep == NULL) {
+            break;
+        }
+
+        *sep = '\0';
+        dir = opendir(path);
+        *sep = '/';
+
+        pch = sep + 1;
     }
 #endif
 }
