@@ -290,22 +290,30 @@ if (WIN32)
 endif()
 
 if(APPLE)
-    target_sources(${EXECUTABLE_NAME} PUBLIC "os/macos/fallout-ce.icns")
-    set_source_files_properties("os/macos/fallout-ce.icns" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-
     if(IOS)
-        target_sources(${EXECUTABLE_NAME} PUBLIC "os/ios/LaunchScreen.storyboard")
-        set_source_files_properties("os/ios/LaunchScreen.storyboard" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-        set_target_properties(${EXECUTABLE_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/os/ios/Info.plist")
-        set_target_properties(${EXECUTABLE_NAME} PROPERTIES XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
-        set_target_properties(${EXECUTABLE_NAME} PROPERTIES XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.alexbatalov.fallout-ce")
+        set(RESOURCES
+            "os/ios/AppIcon.xcassets"
+            "os/ios/LaunchScreen.storyboard"
+        )
+
+        target_sources(${EXECUTABLE_NAME} PUBLIC ${RESOURCES})
+        set_source_files_properties(${RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+        set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/os/ios/Info.plist"
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.alexbatalov.fallout-ce"
+            XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+        )
     else()
         set_target_properties(${EXECUTABLE_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/os/macos/Info.plist")
+        target_sources(${EXECUTABLE_NAME} PUBLIC "os/macos/fallout-ce.icns")
+        set_source_files_properties("os/macos/fallout-ce.icns" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+        set(MACOSX_BUNDLE_ICON_FILE "fallout-ce.icns")
     endif()
 
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.alexbatalov.fallout-ce")
     set(MACOSX_BUNDLE_BUNDLE_NAME "${EXECUTABLE_NAME}")
-    set(MACOSX_BUNDLE_ICON_FILE "fallout-ce.icns")
     set(MACOSX_BUNDLE_DISPLAY_NAME "Fallout")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0.0")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0")

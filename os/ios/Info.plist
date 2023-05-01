@@ -8,8 +8,6 @@
     <string>${MACOSX_BUNDLE_DISPLAY_NAME}</string>
     <key>CFBundleExecutable</key>
     <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
-    <key>CFBundleIconFile</key>
-    <string>${MACOSX_BUNDLE_ICON_FILE}</string>
     <key>CFBundleIdentifier</key>
     <string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
     <key>CFBundleInfoDictionaryVersion</key>
