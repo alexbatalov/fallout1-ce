@@ -14,6 +14,7 @@
 #include "plib/gnw/memory.h"
 #include "plib/gnw/svga.h"
 #include "plib/gnw/text.h"
+#include "plib/gnw/touch.h"
 #include "plib/gnw/vcr.h"
 #include "plib/gnw/winmain.h"
 
@@ -1095,9 +1096,13 @@ void GNW95_process_message()
             handleMouseEvent(&e);
             break;
         case SDL_FINGERDOWN:
+            touch_handle_start(&(e.tfinger));
+            break;
         case SDL_FINGERMOTION:
+            touch_handle_move(&(e.tfinger));
+            break;
         case SDL_FINGERUP:
-            handleTouchEvent(&e);
+            touch_handle_end(&(e.tfinger));
             break;
         case SDL_KEYDOWN:
         case SDL_KEYUP:
@@ -1131,6 +1136,8 @@ void GNW95_process_message()
             break;
         }
     }
+
+    touch_process_gesture();
 
     if (GNW95_isActive && !kb_is_disabled()) {
         // NOTE: Uninline

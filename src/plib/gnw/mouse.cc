@@ -6,6 +6,7 @@
 #include "plib/gnw/input.h"
 #include "plib/gnw/memory.h"
 #include "plib/gnw/svga.h"
+#include "plib/gnw/touch.h"
 #include "plib/gnw/vcr.h"
 
 namespace fallout {
@@ -424,6 +425,54 @@ void mouse_info()
     }
 
     if (mouse_disabled) {
+        return;
+    }
+
+    Gesture gesture;
+    if (touch_get_gesture(&gesture)) {
+        static int prevx;
+        static int prevy;
+
+        switch (gesture.type) {
+        case kTap:
+            if (gesture.numberOfTouches == 1) {
+                mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
+            } else if (gesture.numberOfTouches == 2) {
+                mouse_simulate_input(0, 0, MOUSE_STATE_RIGHT_BUTTON_DOWN);
+            }
+            break;
+        case kLongPress:
+        case kPan:
+            if (gesture.state == kBegan) {
+                prevx = gesture.x;
+                prevy = gesture.y;
+            }
+
+            if (gesture.type == kLongPress) {
+                if (gesture.numberOfTouches == 1) {
+                    mouse_simulate_input(gesture.x - prevx, gesture.y - prevy, MOUSE_STATE_LEFT_BUTTON_DOWN);
+                } else if (gesture.numberOfTouches == 2) {
+                    mouse_simulate_input(gesture.x - prevx, gesture.y - prevy, MOUSE_STATE_RIGHT_BUTTON_DOWN);
+                }
+            } else if (gesture.type == kPan) {
+                if (gesture.numberOfTouches == 1) {
+                    mouse_simulate_input(gesture.x - prevx, gesture.y - prevy, 0);
+                } else if (gesture.numberOfTouches == 2) {
+                    gMouseWheelX = (prevx - gesture.x) / 2;
+                    gMouseWheelY = (gesture.y - prevy) / 2;
+
+                    if (gMouseWheelX != 0 || gMouseWheelY != 0) {
+                        mouse_buttons |= MOUSE_EVENT_WHEEL;
+                        raw_buttons |= MOUSE_EVENT_WHEEL;
+                    }
+                }
+            }
+
+            prevx = gesture.x;
+            prevy = gesture.y;
+            break;
+        }
+
         return;
     }
 
