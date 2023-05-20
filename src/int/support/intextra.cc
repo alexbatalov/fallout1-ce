@@ -41,6 +41,7 @@
 #include "plib/gnw/debug.h"
 #include "plib/gnw/input.h"
 #include "plib/gnw/rect.h"
+#include "plib/gnw/svga.h"
 #include "plib/gnw/vcr.h"
 
 namespace fallout {
@@ -3974,9 +3975,6 @@ static void op_combat_difficulty(Program* program)
 // 0x4522FC
 static void op_obj_on_screen(Program* program)
 {
-    // 0x44B598
-    static Rect rect = { 0, 0, 640, 480 };
-
     Object* object = static_cast<Object*>(programStackPopPointer(program));
 
     int result = 0;
@@ -3986,7 +3984,10 @@ static void op_obj_on_screen(Program* program)
             Rect objectRect;
             obj_bound(object, &objectRect);
 
-            if (rect_inside_bound(&objectRect, &rect, &objectRect) == 0) {
+            // CE: Original code checks if object intersects hardcoded 640x480
+            // rectangle (i.e. without accounting for interface bar). Do the
+            // same but with screen rectangle.
+            if (rect_inside_bound(&objectRect, &scr_size, &objectRect) == 0) {
                 result = 1;
             }
         }
