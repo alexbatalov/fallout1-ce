@@ -40,7 +40,11 @@ $ sudo apt install libsdl2-2.0-0
 
 ### Android
 
-> **NOTE**: Fallout was designed with mouse in mind. There are many controls that require precise cursor positioning, which is not possible with fingers. When playing on Android you'll use fingers to move mouse cursor, not a character, or a map. Double tap to "click" left mouse button in the current cursor position, triple tap to "click" right mouse button. It might feel awkward at first, but it's super handy - you can play with just a thumb. This is not set in stone and might change in the future.
+> **NOTE**: Fallout was designed with mouse in mind. There are many controls that require precise cursor positioning, which is not possible with fingers. Current control scheme resembles trackpad usage:
+> - One finger moves mouse cursor around.
+> - Tap one finger for left mouse click.
+> - Tap two fingers for right mouse click (switches mouse cursor mode).
+> - Move two fingers to scroll current view (map view, worldmap view, inventory scrollers).
 
 > **NOTE**: From Android standpoint release and debug builds are different apps. Both apps require their own copy of game assets and have their own savegames. This is intentional. As a gamer just stick with release version and check for updates.
 
