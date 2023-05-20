@@ -642,7 +642,7 @@ int soundRewind(Sound* sound)
         hr = audioEngineSoundBufferSetCurrentPosition(sound->soundBuffer, 0);
     }
 
-    if (!hr ) {
+    if (!hr) {
         soundErrorno = SOUND_UNKNOWN_ERROR;
         return soundErrorno;
     }

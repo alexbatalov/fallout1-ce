@@ -421,7 +421,6 @@ static void endgame_exit()
     win_delete(endgame_window);
     win_delete(gEndgameEndingOverlay);
 
-
     if (!endgame_mouse_state) {
         mouse_hide();
     }

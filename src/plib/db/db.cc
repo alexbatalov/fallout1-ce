@@ -2214,7 +2214,6 @@ static int db_fill_hash_table(DB_DATABASE* database, const char* path)
         } while (db_findnext(&find_data) != -1);
 
         db_findclose(&find_data);
-
     }
 
     return 0;
@@ -2784,7 +2783,6 @@ int db_freadUInt16(DB_FILE* stream, unsigned short* valuePtr)
 {
     return db_freadShort(stream, valuePtr);
 }
-
 
 int db_freadInt16(DB_FILE* stream, short* valuePtr)
 {

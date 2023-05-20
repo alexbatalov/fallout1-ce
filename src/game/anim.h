@@ -91,7 +91,7 @@ typedef enum AnimationType {
     LAST_SF_DEATH_ANIM = ANIM_FALL_FRONT_BLOOD_SF,
 } AnimationType;
 
-#define FID_ANIM_TYPE(value) ((value) & 0xFF0000) >> 16
+#define FID_ANIM_TYPE(value) ((value)&0xFF0000) >> 16
 
 // Signature of animation callback accepting 2 parameters.
 typedef int AnimationCallback(void*, void*);

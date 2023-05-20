@@ -31,6 +31,18 @@ jobs:
       - name: cppcheck
         run: cppcheck --std=c++17 src/
 
+  code-format:
+    name: Code format check
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: clang-format
+        run: find src -type f -name \*.cc -o -name \*.h | xargs clang-format --dry-run --Werror
+
   android:
     name: Android
 

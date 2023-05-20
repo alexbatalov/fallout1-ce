@@ -291,7 +291,7 @@ void compat_resolve_path(char* path)
 #ifndef _WIN32
     char* pch = path;
 
-    DIR *dir;
+    DIR* dir;
     if (pch[0] == '/') {
         dir = opendir("/");
         pch++;

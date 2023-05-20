@@ -54,7 +54,7 @@ int roll_save(DB_FILE* stream)
     return 0;
 }
 
-//0x49140C
+// 0x49140C
 int roll_load(DB_FILE* stream)
 {
     return 0;

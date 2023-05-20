@@ -19,12 +19,12 @@
 #include "int/audiof.h"
 #include "int/movie.h"
 #include "platform_compat.h"
-#include "pointer_registry.h"
 #include "plib/db/db.h"
 #include "plib/gnw/debug.h"
 #include "plib/gnw/gnw.h"
 #include "plib/gnw/input.h"
 #include "plib/gnw/memory.h"
+#include "pointer_registry.h"
 
 namespace fallout {
 
