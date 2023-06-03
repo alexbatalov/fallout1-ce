@@ -30,7 +30,7 @@ int init_mode_1280_1024();
 int init_vesa_mode(int mode, int width, int height, int half);
 int get_start_mode();
 void reset_mode();
-int GNW95_init_window(int width, int height, bool fullscreen);
+int GNW95_init_window(int width, int height, bool fullscreen, int scale);
 int GNW95_init_DirectDraw(int width, int height, int bpp);
 void GNW95_reset_mode();
 void GNW95_SetPaletteEntries(unsigned char* a1, int a2, int a3);
