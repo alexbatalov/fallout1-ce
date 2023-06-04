@@ -126,6 +126,13 @@ static int GNW95_init_mode_ex(int width, int height, int bpp)
             int scaleValue;
             if (config_get_value(&resolutionConfig, "MAIN", "SCALE_2X", &scaleValue)) {
                 scale = scaleValue + 1; // 0 = 1x, 1 = 2x
+                // Only allow scaling if resulting game resolution is >= 640x480
+                if ((width / scale) < 640 || (height / scale) < 480) {
+                    scale = 1;
+                } else {
+                    width /= scale;
+                    height /= scale;
+                }
             }
         }
         config_exit(&resolutionConfig);
