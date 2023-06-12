@@ -103,6 +103,7 @@ void reset_mode()
 static int GNW95_init_mode_ex(int width, int height, int bpp)
 {
     bool fullscreen = true;
+    int scale = 1;
 
     Config resolutionConfig;
     if (config_init(&resolutionConfig)) {
@@ -121,11 +122,23 @@ static int GNW95_init_mode_ex(int width, int height, int bpp)
             if (configGetBool(&resolutionConfig, "MAIN", "WINDOWED", &windowed)) {
                 fullscreen = !windowed;
             }
+
+            int scaleValue;
+            if (config_get_value(&resolutionConfig, "MAIN", "SCALE_2X", &scaleValue)) {
+                scale = scaleValue + 1; // 0 = 1x, 1 = 2x
+                // Only allow scaling if resulting game resolution is >= 640x480
+                if ((width / scale) < 640 || (height / scale) < 480) {
+                    scale = 1;
+                } else {
+                    width /= scale;
+                    height /= scale;
+                }
+            }
         }
         config_exit(&resolutionConfig);
     }
 
-    if (GNW95_init_window(width, height, fullscreen) == -1) {
+    if (GNW95_init_window(width, height, fullscreen, scale) == -1) {
         return -1;
     }
 
@@ -152,7 +165,7 @@ static int GNW95_init_mode(int width, int height)
 }
 
 // 0x4CAEDC
-int GNW95_init_window(int width, int height, bool fullscreen)
+int GNW95_init_window(int width, int height, bool fullscreen, int scale)
 {
     if (gSdlWindow == NULL) {
         SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
@@ -167,7 +180,7 @@ int GNW95_init_window(int width, int height, bool fullscreen)
             windowFlags |= SDL_WINDOW_FULLSCREEN;
         }
 
-        gSdlWindow = SDL_CreateWindow(GNW95_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, windowFlags);
+        gSdlWindow = SDL_CreateWindow(GNW95_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width * scale, height * scale, windowFlags);
         if (gSdlWindow == NULL) {
             return -1;
         }
