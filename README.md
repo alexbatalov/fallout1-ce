@@ -16,6 +16,8 @@ Download and copy `fallout-ce.exe` to your `Fallout` folder. It serves as a drop
 
 - Use Windows installation as a base - it contains data assets needed to play. Copy `Fallout` folder somewhere, for example `/home/john/Desktop/Fallout`.
 
+- Make sure the `DATA` directory is in lower-case.
+
 - Download and copy `fallout-ce` to this folder.
 
 - Install [SDL2](https://libsdl.org/download-2.0.php):
@@ -77,7 +79,10 @@ The second configuration file is `f1_res.ini`. Use it to change game window size
 SCR_WIDTH=1280
 SCR_HEIGHT=720
 WINDOWED=1
+SCALE_2X=1
 ```
+
+It only reads these values from `f1_res.ini`; all other values are ignored.
 
 Recommendations:
 - **Desktops**: Use any size you see fit.
@@ -85,6 +90,14 @@ Recommendations:
 - **Mobile phones**: Set height to 480, calculate width according to your device screen (aspect) ratio, for example Samsung S21 is 20:9 device, so the width should be 480 * 20 / 9 = 1067.
 
 In time this stuff will receive in-game interface, right now you have to do it manually.
+
+You can use `[section]name=value` from the commandline to override values from the configuration file. For example:
+
+    % ./fallout1-ce ~/games/fallout '[preferences]brightness=2'
+
+Note that the CLI values will be written to `fallout.cfg`! Overriding values from `f1_res.ini` is not supported.
+
+Add `-v` to show more debug information.
 
 ## Contributing
 

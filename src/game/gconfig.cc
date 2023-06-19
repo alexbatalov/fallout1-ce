@@ -1,9 +1,19 @@
 #include "game/gconfig.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#include <shlwapi.h>
+#else
+#include <libgen.h>
+#include <unistd.h>
+#endif
+
 #include "platform_compat.h"
+#include "plib/gnw/debug.h"
 
 namespace fallout {
 
@@ -117,6 +127,52 @@ bool gconfig_init(bool isMapper, int argc, char** argv)
         config_set_value(&game_config, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_SAVE_TEXT_MAPS_KEY, 0);
         config_set_value(&game_config, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_RUN_MAPPER_AS_GAME_KEY, 0);
         config_set_value(&game_config, GAME_CONFIG_MAPPER_KEY, GAME_CONFIG_DEFAULT_F8_AS_GAME_KEY, 1);
+    }
+
+    char* gamedir = NULL;
+    for (int i = 1; i < argc; i++) {
+        if (strlen(argv[i]) < 2 || argv[i][0] != '-') {
+            if (gamedir == NULL && strchr(argv[i], '[') == NULL && strchr(argv[i], ']') == NULL)
+                gamedir = argv[i];
+            continue;
+        }
+
+        switch (argv[i][1]) {
+        case 'v':
+            do_debug = true;
+            break;
+        case 'h':
+            printf("usage: %s [-v] [game_dir] [option...]\n"
+                   "\n"
+                   "Flags:\n"
+                   "  -v           Print more information.\n\n"
+                   "  game_dir     Fallout installation directory; defaults to directory binary\n"
+                   "               is in.\n\n"
+                   "  option       Any list of option to override from fallout.cfg\n"
+                   "               as \"[section]key=value\" Note that new value will be written\n"
+                   "               to fallout.cfg! Overriding values from f1_res.ini is not\n"
+                   "               supported.\n\n",
+                argv[0]);
+            exit(0);
+        }
+    }
+    if (gamedir == NULL) {
+#if _WIN32
+        gamedir = (char*)calloc(strlen(argv[0]), sizeof(char));
+        strcpy(gamedir, argv[0]);
+        PathRemoveFileSpecA(gamedir);
+#else
+        gamedir = dirname(argv[0]);
+#endif
+        if (gamedir == NULL) {
+            perror("resolving argv[0]");
+            exit(1);
+        }
+    }
+    debug_printf("game directory: %s\n", gamedir);
+    if (chdir(gamedir) == -1) {
+        perror("changing to game directory");
+        exit(1);
     }
 
     // Make `fallout.cfg` file path.

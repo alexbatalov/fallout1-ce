@@ -281,6 +281,7 @@ endif()
 if(WIN32)
     target_link_libraries(${EXECUTABLE_NAME}
         winmm
+        Shlwapi
     )
 endif()
 

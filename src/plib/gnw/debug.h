@@ -5,6 +5,8 @@ namespace fallout {
 
 typedef int(DebugFunc)(char* string);
 
+extern bool do_debug;
+
 void GNW_debug_init();
 void debug_register_mono();
 void debug_register_log(const char* fileName, const char* mode);
