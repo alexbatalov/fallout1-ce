@@ -38,6 +38,24 @@ $ sudo apt install libsdl2-2.0-0
 
 - Run `fallout-ce.app`.
 
+### macOS build
+
+Before start:
+
+- Clone this repository to your computer
+- change `LSMinimumSystemVersion` in `./os/macos/Info.plist` to your current OS version (e.g. 13.3.0)
+- install Xcode if haven't installed it yet: [link](https://developer.apple.com/support/xcode/)
+
+To build:
+
+- Open root folder of this repository in any terminal app
+- run the next commands (you probably need to do it as `sudo`):
+  - `cmake -B build -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=''`
+  - `cmake --build build --config RelWithDebInfo -j $(sysctl -n hw.physicalcpu)`
+  - `cd build`
+  - `cpack -C RelWithDebInfo`
+- use output `path/to/fallout1-ce/build/Fallout Community Edition.dmg` to get new app
+
 ### Android
 
 > **NOTE**: Fallout was designed with mouse in mind. There are many controls that require precise cursor positioning, which is not possible with fingers. Current control scheme resembles trackpad usage:
