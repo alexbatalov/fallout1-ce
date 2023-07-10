@@ -43,18 +43,16 @@ $ sudo apt install libsdl2-2.0-0
 Before start:
 
 - Clone this repository to your computer
-- change `LSMinimumSystemVersion` in `./os/macos/Info.plist` to your current OS version (e.g. 13.3.0)
 - install Xcode if haven't installed it yet: [link](https://developer.apple.com/support/xcode/)
-
-To build:
-
 - Open root folder of this repository in any terminal app
-- run the next commands (you probably need to do it as `sudo`):
-  - `cmake -B build -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY=''`
-  - `cmake --build build --config RelWithDebInfo -j $(sysctl -n hw.physicalcpu)`
-  - `cd build`
-  - `cpack -C RelWithDebInfo`
-- use output `path/to/fallout1-ce/build/Fallout Community Edition.dmg` to get new app
+
+Build:
+
+- Configure (based on your platform):
+  - Intel: `cmake -B build -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY='' -D CMAKE_OSX_ARCHITECTURES=x86_64`
+  - Apple Silicon: `cmake -B build -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY='' -D CMAKE_OSX_ARCHITECTURES=arm64`
+- Build: `cmake --build build --config RelWithDebInfo -j $(sysctl -n hw.physicalcpu)`
+- find your new application at path `/build/RelWithDebInfo/Fallout Community Edition.app`
 
 ### Android
 
