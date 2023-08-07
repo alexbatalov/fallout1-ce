@@ -677,7 +677,7 @@ int art_read_lst(const char* path, char** artListPtr, int* artListSizePtr)
     }
 
     while (db_fgets(string, sizeof(string), stream)) {
-        char* brk = strpbrk(string, " ,;\t\n");
+        char* brk = strpbrk(string, " ,;\r\t\n");
         if (brk != NULL) {
             *brk = '\0';
         }
