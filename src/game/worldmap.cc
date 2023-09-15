@@ -3557,12 +3557,12 @@ static int RegTMAPsels(int win, int city)
         }
 
         if (TwnSelKnwFlag[city][index]) {
-            memset(hvrbtn[index], 0, 164 * 25);
+            memset(hvrbtn[count], 0, 164 * 25);
             buf_to_buf(tmapbmp[TOWNMAP_FRM_HOTSPOT_NORMAL],
                 HOTSPOT_WIDTH,
                 HOTSPOT_HEIGHT,
                 HOTSPOT_WIDTH,
-                hvrbtn[index] + 164 * 12 + 69,
+                hvrbtn[count] + 164 * 12 + 69,
                 164);
 
             switch (v4) {
@@ -3582,12 +3582,12 @@ static int RegTMAPsels(int win, int city)
                 name_x = 0;
             }
 
-            text_to_buf(hvrbtn[index] + name_x, name, 164, 164, color);
+            text_to_buf(hvrbtn[count] + name_x, name, 164, 164, color);
 
             button_x = entry->x - 57;
             button_y = entry->y - 6;
 
-            TMSelBttns[index] = win_register_button(win,
+            TMSelBttns[count] = win_register_button(win,
                 entry->x - 57,
                 entry->y - 6,
                 164,
@@ -3598,18 +3598,18 @@ static int RegTMAPsels(int win, int city)
                 514 + count,
                 onbtn,
                 offbtn,
-                hvrbtn[index],
+                hvrbtn[count],
                 BUTTON_FLAG_TRANSPARENT);
-            win_register_button_mask(TMSelBttns[index], btnmsk);
-            win_register_button_func(TMSelBttns[index], NULL, HvrOffBtn, NULL, NULL);
+            win_register_button_mask(TMSelBttns[count], btnmsk);
+            win_register_button_func(TMSelBttns[count], NULL, HvrOffBtn, NULL, NULL);
 
-            debug_printf("button found count=%d, bcount=%d, btnid=%d\n", index, count, TMSelBttns[index]);
+            debug_printf("button found count=%d, bcount=%d, btnid=%d\n", index, count, TMSelBttns[count]);
 
-            win_register_button_sound_func(TMSelBttns[index], gsound_med_butt_press, NULL);
+            win_register_button_sound_func(TMSelBttns[count], gsound_med_butt_press, NULL);
 
-            brnpos[index].x = button_x;
-            brnpos[index].y = button_y;
-            brnpos[index].bid = TMSelBttns[index];
+            brnpos[count].x = button_x;
+            brnpos[count].y = button_y;
+            brnpos[count].bid = TMSelBttns[count];
 
             tcode_xref[count] = index;
 
