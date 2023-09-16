@@ -975,7 +975,7 @@ void gmouse_handle_event(int mouseX, int mouseY, int mouseState)
                                 } else {
                                     obj_dude->data.critter.combat.ap -= actionPointsRequired;
                                 }
-                                intface_update_move_points(obj_dude->data.critter.combat.ap);
+                                intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
                             }
                         }
                     } else {

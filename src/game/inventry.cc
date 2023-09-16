@@ -415,7 +415,7 @@ void handle_inventory()
             }
 
             obj_dude->data.critter.combat.ap -= actionPointsRequired;
-            intface_update_move_points(obj_dude->data.critter.combat.ap);
+            intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
         }
     }
 

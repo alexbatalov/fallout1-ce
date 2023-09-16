@@ -1108,7 +1108,7 @@ int check_scenery_ap_cost(Object* obj, Object* a2)
         obj->data.critter.combat.ap = actionPoints - 3;
 
         if (obj == obj_dude) {
-            intface_update_move_points(obj_dude->data.critter.combat.ap);
+            intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
         }
 
         return 0;

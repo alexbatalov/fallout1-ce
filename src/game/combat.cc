@@ -1825,7 +1825,7 @@ static void combat_over()
 
     obj_dude->data.critter.combat.ap = stat_level(obj_dude, STAT_MAXIMUM_ACTION_POINTS);
 
-    intface_update_move_points(0);
+    intface_update_move_points(0, 0);
 
     if (game_user_wants_to_quit == 0) {
         combat_give_exps(combat_exps);
@@ -2155,7 +2155,7 @@ static int combat_input()
             break;
         }
 
-        if (obj_dude->data.critter.combat.ap <= 0) {
+        if (obj_dude->data.critter.combat.ap <= 0 && combat_free_move <= 0) {
             break;
         }
 
@@ -2235,7 +2235,7 @@ static int combat_turn(Object* a1, bool a2)
             kb_clear();
             intface_update_ac(true);
             combat_free_move = 2 * perk_level(PERK_BONUS_MOVE);
-            intface_update_move_points(obj_dude->data.critter.combat.ap);
+            intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
         } else {
             soundUpdate();
         }
@@ -2285,7 +2285,7 @@ static int combat_turn(Object* a1, bool a2)
                     a1->data.critter.combat.damageLastTurn = 0;
                     intface_end_buttons_disable();
                     combat_outline_off();
-                    intface_update_move_points(-1);
+                    intface_update_move_points(-1, -1);
                     intface_update_ac(true);
                     combat_free_move = 0;
                     return -1;
@@ -2307,7 +2307,7 @@ static int combat_turn(Object* a1, bool a2)
             gmouse_set_cursor(MOUSE_CURSOR_WAIT_WATCH);
             intface_end_buttons_disable();
             combat_outline_off();
-            intface_update_move_points(-1);
+            intface_update_move_points(-1, -1);
             combat_turn_obj = NULL;
             intface_update_ac(true);
             combat_turn_obj = obj_dude;
@@ -2537,7 +2537,7 @@ int combat_attack(Object* attacker, Object* defender, int hitMode, int hitLocati
     }
 
     if (attacker == obj_dude) {
-        intface_update_move_points(attacker->data.critter.combat.ap);
+        intface_update_move_points(attacker->data.critter.combat.ap, combat_free_move);
         critter_set_who_hit_me(attacker, defender);
     }
 
@@ -4141,7 +4141,7 @@ static void combat_standup(Object* critter)
     }
 
     if (critter == obj_dude) {
-        intface_update_move_points(obj_dude->data.critter.combat.ap);
+        intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
     }
 
     dude_standup(critter);

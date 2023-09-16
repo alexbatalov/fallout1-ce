@@ -2652,7 +2652,7 @@ static void object_move(int index)
                 }
 
                 if (object == obj_dude) {
-                    intface_update_move_points(obj_dude->data.critter.combat.ap);
+                    intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
                 }
 
                 v17 = (object->data.critter.combat.ap + combat_free_move) <= 0;

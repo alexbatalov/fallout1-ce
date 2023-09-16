@@ -45,7 +45,7 @@ bool intface_is_enabled();
 void intface_redraw();
 void intface_update_hit_points(bool animate);
 void intface_update_ac(bool animate);
-void intface_update_move_points(int actionPointsLeft);
+void intface_update_move_points(int actionPoints, int bonusMove);
 int intface_get_attack(int* hitMode, bool* aiming);
 int intface_update_items(bool animated);
 int intface_toggle_items(bool animated);

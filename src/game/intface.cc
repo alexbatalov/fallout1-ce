@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <algorithm>
+
 #include "game/anim.h"
 #include "game/art.h"
 #include "game/combat.h"
@@ -1177,7 +1179,7 @@ void intface_update_ac(bool animate)
 }
 
 // 0x4547D4
-void intface_update_move_points(int actionPointsLeft)
+void intface_update_move_points(int actionPoints, int bonusMove)
 {
     unsigned char* frmData;
 
@@ -1187,24 +1189,34 @@ void intface_update_move_points(int actionPointsLeft)
 
     buf_to_buf(movePointBackground, 90, 5, 90, interfaceBuffer + 14 * 640 + 316, 640);
 
-    if (actionPointsLeft == -1) {
+    if (actionPoints == -1) {
         frmData = moveLightRed;
-        actionPointsLeft = 10;
+        actionPoints = 10;
+        bonusMove = 0;
     } else {
         frmData = moveLightGreen;
-
-        if (actionPointsLeft < 0) {
-            actionPointsLeft = 0;
-        }
-
-        if (actionPointsLeft > 10) {
-            actionPointsLeft = 10;
-        }
     }
 
-    int index;
-    for (index = 0; index < actionPointsLeft; index++) {
-        buf_to_buf(frmData, 5, 5, 5, interfaceBuffer + 14 * 640 + 316 + index * 9, 640);
+    int circle = 0;
+
+    for (int index = 0; index < actionPoints && circle < 10; index++) {
+        buf_to_buf(frmData,
+            5,
+            5,
+            5,
+            interfaceBuffer + 14 * 640 + 316 + circle * 9,
+            640);
+        circle++;
+    }
+
+    for (int index = 0; index < bonusMove && circle < 10; index++) {
+        buf_to_buf(moveLightYellow,
+            5,
+            5,
+            5,
+            interfaceBuffer + 14 * 640 + 316 + circle * 9,
+            640);
+        circle++;
     }
 
     if (!insideInit) {
@@ -1439,7 +1451,7 @@ void intface_use_item()
                         } else {
                             obj_dude->data.critter.combat.ap -= actionPointsRequired;
                         }
-                        intface_update_move_points(obj_dude->data.critter.combat.ap);
+                        intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
                     }
                 }
             } else {
@@ -1467,7 +1479,7 @@ void intface_use_item()
                     obj_dude->data.critter.combat.ap -= actionPointsRequired;
                 }
 
-                intface_update_move_points(obj_dude->data.critter.combat.ap);
+                intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
             }
         } else {
             obj_use_item(obj_dude, ptr->item);
