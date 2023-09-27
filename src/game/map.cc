@@ -455,6 +455,9 @@ int map_set_elevation(int elevation)
     gmouse_set_cursor(MOUSE_CURSOR_NONE);
     map_elevation = elevation;
 
+    // CE: Recalculate bounds.
+    tile_update_bounds_base();
+
     register_clear(obj_dude);
     dude_stand(obj_dude, obj_dude->rotation, obj_dude->fid);
     partyMemberSyncPosition();
@@ -1611,6 +1614,7 @@ static void map_scroll_refresh_game(Rect* rect)
     grid_render(&rectToUpdate, map_elevation);
     obj_render_pre_roof(&rectToUpdate, map_elevation);
     square_render_roof(&rectToUpdate, map_elevation);
+    bounds_render(&rectToUpdate, map_elevation);
     obj_render_post_roof(&rectToUpdate, map_elevation);
 }
 

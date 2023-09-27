@@ -63,6 +63,12 @@ void floor_draw(int fid, int x, int y, Rect* rect);
 int tile_make_line(int currentCenterTile, int newCenterTile, int* tiles, int tilesCapacity);
 int tile_scroll_to(int tile, int flags);
 
+void tile_update_bounds_base();
+void tile_update_bounds_rect();
+int tile_inside_bound(Rect* rect);
+bool tile_point_inside_bound(int x, int y);
+void bounds_render(Rect* rect, int elevation);
+
 } // namespace fallout
 
 #endif /* FALLOUT_GAME_TILE_H_ */
