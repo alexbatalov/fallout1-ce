@@ -1,6 +1,7 @@
 #include "game/tile.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <string.h>
 
 #define _USE_MATH_DEFINES
