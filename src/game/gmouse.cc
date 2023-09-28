@@ -859,6 +859,11 @@ void gmouse_handle_event(int mouseX, int mouseY, int mouseState)
         return;
     }
 
+    // CE: Make sure we cannot go outside of the map.
+    if (!tile_point_inside_bound(mouseX, mouseY)) {
+        return;
+    }
+
     if ((mouseState & MOUSE_EVENT_RIGHT_BUTTON_DOWN) != 0) {
         if ((mouseState & MOUSE_EVENT_RIGHT_BUTTON_REPEAT) == 0) {
             if (gmouse_3d_is_on()) {

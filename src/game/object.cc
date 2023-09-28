@@ -772,6 +772,19 @@ void obj_render_pre_roof(Rect* rect, int elevation)
         return;
     }
 
+    // CE: Constrain rect to tile bounds so that we don't draw outside.
+    if (tile_inside_bound(&updatedRect) != 0) {
+        // Mouse hex cursor is a special case - should be shown as outline when
+        // out of bounds (see `obj_render_outline`).
+        outlineCount = 0;
+        if ((obj_mouse_flat->flags & OBJECT_HIDDEN) == 0
+            && (obj_mouse_flat->outline & OUTLINE_TYPE_MASK) != 0
+            && (obj_mouse_flat->outline & OUTLINE_DISABLED) == 0) {
+            outlinedObjects[outlineCount++] = obj_mouse_flat;
+        }
+        return;
+    }
+
     int ambientIntensity = light_get_ambient();
     int minX = updatedRect.ulx - 320;
     int minY = updatedRect.uly - 240;
@@ -874,8 +887,23 @@ void obj_render_post_roof(Rect* rect, int elevation)
         return;
     }
 
+    // CE: Constrain rect to tile bounds so that we don't draw outside.
+    Rect constrainedRect = updatedRect;
+    if (tile_inside_bound(&constrainedRect) != 0) {
+        constrainedRect.ulx = 0;
+        constrainedRect.uly = 0;
+        constrainedRect.lrx = 0;
+        constrainedRect.lry = 0;
+    }
+
     for (int index = 0; index < outlineCount; index++) {
-        obj_render_outline(outlinedObjects[index], &updatedRect);
+        // Mouse hex cursor is a special case - should be shown without
+        // constraining otherwise its hidden.
+        if (outlinedObjects[index] == obj_mouse_flat) {
+            obj_render_outline(outlinedObjects[index], &updatedRect);
+        } else {
+            obj_render_outline(outlinedObjects[index], &constrainedRect);
+        }
     }
 
     text_object_render(&updatedRect);

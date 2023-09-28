@@ -1,6 +1,7 @@
 #include "game/tile.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <string.h>
 
 #define _USE_MATH_DEFINES
@@ -557,6 +558,9 @@ int tile_set_center(int tile, int flags)
 
     tile_center_tile = tile;
 
+    // CE: Updates bounds screen coordinates.
+    tile_update_bounds_rect();
+
     if ((flags & TILE_SET_CENTER_REFRESH_WINDOW) != 0) {
         // NOTE: Uninline.
         tile_refresh_display();
@@ -606,6 +610,7 @@ static void refresh_game(Rect* rect, int elevation)
     square_render_floor(&rectToUpdate, elevation);
     obj_render_pre_roof(&rectToUpdate, elevation);
     square_render_roof(&rectToUpdate, elevation);
+    bounds_render(&rectToUpdate, elevation);
     obj_render_post_roof(&rectToUpdate, elevation);
     blit(&rectToUpdate);
 }
@@ -1154,10 +1159,16 @@ void square_render_roof(Rect* rect, int elevation)
     int maxX;
     int maxY;
 
-    square_xy_roof(rect->ulx, rect->uly, elevation, &temp, &minY);
-    square_xy_roof(rect->lrx, rect->uly, elevation, &minX, &temp);
-    square_xy_roof(rect->ulx, rect->lry, elevation, &maxX, &temp);
-    square_xy_roof(rect->lrx, rect->lry, elevation, &temp, &maxY);
+    // CE: Constrain rect to tile bounds so that we don't draw outside.
+    Rect constrainedRect = *rect;
+    if (tile_inside_bound(&constrainedRect) != 0) {
+        return;
+    }
+
+    square_xy_roof(constrainedRect.ulx, constrainedRect.uly, elevation, &temp, &minY);
+    square_xy_roof(constrainedRect.lrx, constrainedRect.uly, elevation, &minX, &temp);
+    square_xy_roof(constrainedRect.ulx, constrainedRect.lry, elevation, &maxX, &temp);
+    square_xy_roof(constrainedRect.lrx, constrainedRect.lry, elevation, &temp, &maxY);
 
     if (minX < 0) {
         minX = 0;
@@ -1191,7 +1202,7 @@ void square_render_roof(Rect* rect, int elevation)
                     int screenX;
                     int screenY;
                     square_coord_roof(squareTile, &screenX, &screenY, elevation);
-                    roof_draw(fid, screenX, screenY, rect, light);
+                    roof_draw(fid, screenX, screenY, &constrainedRect, light);
                 }
             }
         }
@@ -1378,10 +1389,16 @@ void square_render_floor(Rect* rect, int elevation)
     int minX;
     int temp;
 
-    square_xy(rect->ulx, rect->uly, elevation, &temp, &minY);
-    square_xy(rect->lrx, rect->uly, elevation, &minX, &temp);
-    square_xy(rect->ulx, rect->lry, elevation, &maxX, &temp);
-    square_xy(rect->lrx, rect->lry, elevation, &temp, &maxY);
+    // CE: Constrain rect to tile bounds so that we don't draw outside.
+    Rect constrainedRect = *rect;
+    if (tile_inside_bound(&constrainedRect) != 0) {
+        return;
+    }
+
+    square_xy(constrainedRect.ulx, constrainedRect.uly, elevation, &temp, &minY);
+    square_xy(constrainedRect.lrx, constrainedRect.uly, elevation, &minX, &temp);
+    square_xy(constrainedRect.ulx, constrainedRect.lry, elevation, &maxX, &temp);
+    square_xy(constrainedRect.lrx, constrainedRect.lry, elevation, &temp, &maxY);
 
     if (minX < 0) {
         minX = 0;
@@ -1412,7 +1429,7 @@ void square_render_floor(Rect* rect, int elevation)
                 int tileScreenY;
                 square_coord(squareTile, &tileScreenX, &tileScreenY, elevation);
                 int fid = art_id(OBJ_TYPE_TILE, frmId & 0xFFF, 0, 0, 0);
-                floor_draw(fid, tileScreenX, tileScreenY, rect);
+                floor_draw(fid, tileScreenX, tileScreenY, &constrainedRect);
             }
         }
         baseSquareTile += square_width;
@@ -1958,6 +1975,204 @@ int tile_scroll_to(int tile, int flags)
     }
 
     return rc;
+}
+
+static Rect tile_bounds_rect;
+static int tile_bounds_left_off;
+static int tile_bounds_top_off;
+static int tile_bounds_right_off;
+static int tile_bounds_bottom_off;
+
+void tile_update_bounds_base()
+{
+    int min_x = INT_MAX;
+    int min_y = INT_MAX;
+    int max_x = INT_MIN;
+    int max_y = INT_MIN;
+
+    // Determine bounding rectangle of scroll blocking objects.
+    for (int tile = 0; tile < grid_size; tile++) {
+        if (obj_scroll_blocking_at(tile, map_elevation) == 0) {
+            int x;
+            int y;
+            tile_coord(tile, &x, &y, map_elevation);
+            x += 16;
+            y += 8;
+
+            if (x < min_x) {
+                min_x = x;
+            }
+
+            if (y < min_y) {
+                min_y = y;
+            }
+
+            if (x > max_x) {
+                max_x = x;
+            }
+
+            if (y > max_y) {
+                max_y = y;
+            }
+        }
+    }
+
+    // Translate bounding rectangle in screen coordinates (which are relative
+    // to screen center tile) to offsets from reference tile (geometric center
+    // of the map).
+
+    int geometric_center_x;
+    int geometric_center_y;
+    tile_coord(20100, &geometric_center_x, &geometric_center_y, map_elevation);
+    geometric_center_x += 16;
+    geometric_center_y += 8;
+
+    tile_bounds_left_off = min_x - geometric_center_x;
+    tile_bounds_top_off = min_y - geometric_center_y;
+    tile_bounds_right_off = max_x - geometric_center_x;
+    tile_bounds_bottom_off = max_y - geometric_center_y;
+}
+
+void tile_update_bounds_rect()
+{
+    // Translate offsets from reference tile to screen coordinates.
+
+    int geometric_center_x;
+    int geometric_center_y;
+    tile_coord(20100, &geometric_center_x, &geometric_center_y, map_elevation);
+    geometric_center_x += 16;
+    geometric_center_y += 8;
+
+    tile_bounds_rect.ulx = tile_bounds_left_off + geometric_center_x;
+    tile_bounds_rect.uly = tile_bounds_top_off + geometric_center_y;
+    tile_bounds_rect.lrx = tile_bounds_right_off + geometric_center_x;
+    tile_bounds_rect.lry = tile_bounds_bottom_off + geometric_center_y;
+
+    // The bounding rectangle' corners are centers from scroll blocking objects.
+    // Since we're dealing with hex map where each row is shifted, we have two
+    // sets of blockers on each edge - to handle odd and even rows. Depending
+    // on scroll blockers location we can either have center tile to "touch"
+    // one scroll blocker or be "surrounded" by three of them. This requires
+    // bounds to be multiple of scroll steps.
+
+    int tile_center_x;
+    int tile_center_y;
+    tile_coord(tile_center_tile, &tile_center_x, &tile_center_y, map_elevation);
+    tile_center_x += 16;
+    tile_center_y += 8;
+
+    tile_bounds_rect.ulx -= (tile_bounds_rect.ulx - tile_center_x) % 32;
+    tile_bounds_rect.uly -= (tile_bounds_rect.uly - tile_center_y) % 24;
+    tile_bounds_rect.lrx -= (tile_bounds_rect.lrx - tile_center_x) % 32;
+    tile_bounds_rect.lry -= (tile_bounds_rect.lry - tile_center_y) % 24;
+
+    // Scroll blocker itself cannot become center tile, so inset bounds for one
+    // full tile size.
+    tile_bounds_rect.ulx += 32;
+    tile_bounds_rect.uly += 16;
+    tile_bounds_rect.lrx -= 32;
+    tile_bounds_rect.lry -= 16;
+
+    // Scroll blockers where placed for 640x480 resolution, which means visible
+    // rect is half of than amount in each direction.
+    tile_bounds_rect.ulx -= 640 / 2;
+    tile_bounds_rect.uly -= (480 - 100) / 2;
+    tile_bounds_rect.lrx += 640 / 2;
+    tile_bounds_rect.lry += (480 - 100) / 2;
+
+    // Adjust for vertical layout.
+    tile_bounds_rect.uly += 8;
+    tile_bounds_rect.lry -= 8;
+
+    // Decrement one px to make sure rect is what engine expects it to be.
+    tile_bounds_rect.lrx -= 1;
+    tile_bounds_rect.lry -= 1;
+}
+
+int tile_inside_bound(Rect* rect)
+{
+    return rect_inside_bound(rect, &tile_bounds_rect, rect);
+}
+
+bool tile_point_inside_bound(int x, int y)
+{
+    return x >= tile_bounds_rect.ulx && x <= tile_bounds_rect.lrx
+        && y >= tile_bounds_rect.uly && y <= tile_bounds_rect.lry;
+}
+
+void bounds_render(Rect* rect, int elevation)
+{
+    constexpr int kShadowSize = 16;
+
+    Rect edge;
+
+    // Left.
+    edge.ulx = tile_bounds_rect.ulx;
+    edge.uly = tile_bounds_rect.uly;
+    edge.lrx = tile_bounds_rect.ulx + kShadowSize;
+    edge.lry = tile_bounds_rect.lry;
+    if (rect_inside_bound(&edge, rect, &edge) == 0) {
+        for (int y = edge.uly; y <= edge.lry; y++) {
+            unsigned char* dest = buf + buf_full * y + edge.ulx;
+            int step = edge.ulx - tile_bounds_rect.ulx;
+            for (int x = edge.ulx; x <= edge.lrx; x++) {
+                unsigned char color = *dest;
+                *dest++ = intensityColorTable[color][step * 128 / kShadowSize];
+                step++;
+            }
+        }
+    }
+
+    // Top.
+    edge.ulx = tile_bounds_rect.ulx;
+    edge.uly = tile_bounds_rect.uly;
+    edge.lrx = tile_bounds_rect.lrx;
+    edge.lry = tile_bounds_rect.uly + kShadowSize;
+    if (rect_inside_bound(&edge, rect, &edge) == 0) {
+        int step = edge.uly - tile_bounds_rect.uly;
+        for (int y = edge.uly; y <= edge.lry; y++) {
+            unsigned char* dest = buf + buf_full * y + edge.ulx;
+            for (int x = edge.ulx; x <= edge.lrx; x++) {
+                unsigned char color = *dest;
+                *dest++ = intensityColorTable[color][step * 128 / kShadowSize];
+            }
+            step++;
+        }
+    }
+
+    // Right.
+    edge.ulx = tile_bounds_rect.lrx - kShadowSize;
+    edge.uly = tile_bounds_rect.uly;
+    edge.lrx = tile_bounds_rect.lrx;
+    edge.lry = tile_bounds_rect.lry;
+    if (rect_inside_bound(&edge, rect, &edge) == 0) {
+        for (int y = edge.uly; y <= edge.lry; y++) {
+            unsigned char* dest = buf + buf_full * y + edge.lrx;
+            int step = tile_bounds_rect.lrx - edge.lrx;
+            for (int x = edge.lrx; x >= edge.ulx; x--) {
+                unsigned char color = *dest;
+                *dest-- = intensityColorTable[color][step * 128 / kShadowSize];
+                step++;
+            }
+        }
+    }
+
+    // Bottom.
+    edge.ulx = tile_bounds_rect.ulx;
+    edge.uly = tile_bounds_rect.lry - kShadowSize;
+    edge.lrx = tile_bounds_rect.lrx;
+    edge.lry = tile_bounds_rect.lry;
+    if (rect_inside_bound(&edge, rect, &edge) == 0) {
+        int step = tile_bounds_rect.lry - edge.lry;
+        for (int y = edge.lry; y >= edge.uly; y--) {
+            unsigned char* dest = buf + buf_full * y + edge.ulx;
+            for (int x = edge.ulx; x <= edge.lrx; x++) {
+                unsigned char color = *dest;
+                *dest++ = intensityColorTable[color][step * 128 / kShadowSize];
+            }
+            step++;
+        }
+    }
 }
 
 } // namespace fallout
