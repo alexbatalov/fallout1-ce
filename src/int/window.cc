@@ -105,54 +105,6 @@ static int winTOS = -1;
 // 0x508698
 static int currentWindow = -1;
 
-// 0x50869C
-static VideoSystemInitProc* gfx_init[12] = {
-    init_mode_320_200,
-    init_mode_640_480,
-    init_mode_640_480_16,
-    init_mode_320_400,
-    init_mode_640_480_16,
-    init_mode_640_400,
-    init_mode_640_480_16,
-    init_mode_800_600,
-    init_mode_640_480_16,
-    init_mode_1024_768,
-    init_mode_640_480_16,
-    init_mode_1280_1024,
-};
-
-// 0x5086CC
-static int fontnum[12] = {
-    3,
-    0,
-    0,
-    3,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-};
-
-// 0x5086FC
-static Size sizes[12] = {
-    { 320, 200 },
-    { 640, 480 },
-    { 640, 240 },
-    { 320, 400 },
-    { 640, 200 },
-    { 640, 400 },
-    { 800, 300 },
-    { 800, 600 },
-    { 1024, 384 },
-    { 1024, 768 },
-    { 1280, 512 },
-    { 1280, 1024 },
-};
-
 // 0x50875C
 static int numInputFunc = 0;
 
@@ -1575,7 +1527,7 @@ static void windowRemoveProgramReferences(Program* program)
 }
 
 // 0x4A5C9C
-void initWindow(int resolution, int a2)
+void initWindow(VideoOptions* video_options, int flags)
 {
     char err[COMPAT_MAX_PATH];
     int rc;
@@ -1588,17 +1540,18 @@ void initWindow(int resolution, int a2)
     currentTextColorB = 0;
     currentHighlightColorR = 0;
     currentHighlightColorG = 0;
+    currentHighlightColorB = 0;
     currentTextFlags = 0x2010000;
 
-    yres = sizes[resolution].height; // screen height
-    currentHighlightColorB = 0;
-    xres = sizes[resolution].width; // screen width
+    // TODO: Review usage.
+    yres = 640;
+    xres = 480;
 
     for (int i = 0; i < MANAGED_WINDOW_COUNT; i++) {
         windows[i].window = -1;
     }
 
-    rc = win_init(gfx_init[resolution], GNW95_reset_mode, a2);
+    rc = win_init(video_options, flags);
     if (rc != WINDOW_MANAGER_OK) {
         switch (rc) {
         case WINDOW_MANAGER_ERR_INITIALIZING_VIDEO_MODE:
