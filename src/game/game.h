@@ -25,7 +25,7 @@ extern MessageList misc_message_file;
 extern DB_DATABASE* master_db_handle;
 extern DB_DATABASE* critter_db_handle;
 
-int game_init(const char* windowTitle, bool isMapper, int a3, int a4, int argc, char** argv);
+int game_init(const char* windowTitle, bool isMapper, int font, int flags, int argc, char** argv);
 void game_reset();
 void game_exit();
 int game_handle_input(int eventCode, bool isInCombatMode);

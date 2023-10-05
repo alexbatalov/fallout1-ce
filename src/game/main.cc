@@ -250,6 +250,9 @@ static void main_exit_system()
     main_selfrun_exit();
 
     game_exit();
+
+    // TODO: Find a better place for this call.
+    SDL_Quit();
 }
 
 // 0x472958

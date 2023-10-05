@@ -5,6 +5,7 @@
 
 #include "plib/gnw/gnw_types.h"
 #include "plib/gnw/rect.h"
+#include "plib/gnw/svga_types.h"
 
 namespace fallout {
 
@@ -29,15 +30,12 @@ typedef enum WindowManagerErr {
     WINDOW_MANAGER_ERR_INITIALIZING_INPUT = 11,
 } WindowManagerErr;
 
-typedef int(VideoSystemInitProc)();
-typedef void(VideoSystemExitProc)();
-
 extern bool GNW_win_init_flag;
 extern int GNW_wcolor[6];
 
 extern void* GNW_texture;
 
-int win_init(VideoSystemInitProc* videoSystemInitProc, VideoSystemExitProc* videoSystemExitProc, int a3);
+int win_init(VideoOptions* video_options, int flags);
 int win_active();
 void win_exit(void);
 int win_add(int x, int y, int width, int height, int color, int flags);
