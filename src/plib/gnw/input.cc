@@ -8,6 +8,7 @@
 #include "plib/color/color.h"
 #include "plib/gnw/button.h"
 #include "plib/gnw/dxinput.h"
+#include "plib/gnw/gamepad.hpp"
 #include "plib/gnw/gnw.h"
 #include "plib/gnw/grbuf.h"
 #include "plib/gnw/intrface.h"
@@ -1085,6 +1086,9 @@ void GNW95_process_message()
     // is disabled, because if we ignore it, we'll never be able to reactivate
     // it again.
 
+    ProcessLeftStick();
+    ProcessRightStick();
+
     KeyboardData keyboardData;
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
@@ -1111,6 +1115,21 @@ void GNW95_process_message()
                 keyboardData.down = (e.key.state & SDL_PRESSED) != 0;
                 GNW95_process_key(&keyboardData);
             }
+            break;
+        case SDL_JOYDEVICEADDED:
+            HandleJoystickDeviceAdded(e);
+            break;
+        case SDL_JOYDEVICEREMOVED:
+            HandleJoystickDeviceRemoved(e);
+            break;
+        case SDL_CONTROLLERDEVICEADDED:
+            HandleControllerDeviceAdded(e);
+            break;
+        case SDL_CONTROLLERDEVICEREMOVED:
+            HandleControllerDeviceRemoved(e);
+            break;
+        case SDL_CONTROLLERAXISMOTION:
+            HandleControllerAxisMotion(e);
             break;
         case SDL_WINDOWEVENT:
             switch (e.window.event) {

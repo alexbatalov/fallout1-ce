@@ -13,7 +13,8 @@ static int gMouseWheelDeltaY = 0;
 // 0x4E0400
 bool dxinput_init()
 {
-    if (SDL_InitSubSystem(SDL_INIT_EVENTS) != 0) {
+    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+    if (SDL_InitSubSystem(SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) != 0) {
         return false;
     }
 
