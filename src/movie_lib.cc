@@ -5,10 +5,12 @@
 #include "movie_lib.h"
 
 #include <assert.h>
+#include <cstdint>
 #include <stdio.h>
 #include <string.h>
 
 #include "audio_engine.h"
+#include "endian.hpp"
 #include "platform_compat.h"
 
 namespace fallout {
@@ -757,7 +759,7 @@ static unsigned char* _ioNextRecord()
         return NULL;
     }
 
-    _io_next_hdr = *(int*)(buf + (_io_next_hdr & 0xFFFF));
+    _io_next_hdr = LoadLE32(buf + (_io_next_hdr & 0xFFFF));
 
     return buf;
 }
@@ -854,7 +856,7 @@ LABEL_5:
     }
 
     while (1) {
-        v5 = *(unsigned int*)((unsigned char*)v1 + v0);
+        v5 = LoadLE32((unsigned char*)v1 + v0);
         v1 = (unsigned short*)((unsigned char*)v1 + v0 + 4);
         v0 = v5 & 0xFFFF;
 
@@ -877,7 +879,7 @@ LABEL_5:
             } else {
                 v7 = (v1[1] & 0x04) >> 2;
             }
-            v8 = *(unsigned int*)((unsigned char*)v1 + 6);
+            v8 = LoadLE32((unsigned char*)v1 + 6);
             if ((v5 >> 24) == 0) {
                 v8 &= 0xFFFF;
             }
@@ -1438,7 +1440,7 @@ static int _MVE_sndAdd(unsigned char* dest, unsigned char** src_ptr, int a3, int
     }
 
     if (a5) {
-        v12 = *(unsigned int*)src;
+        v12 = LoadLE32(src);
         src += 4;
 
         *(unsigned int*)dest = v12;
@@ -1868,8 +1870,6 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
     int i;
     int j;
     ptrdiff_t v10;
-    int v11;
-    int v13;
     int byte;
     unsigned int value1;
     unsigned int value2;
@@ -1895,6 +1895,10 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
         dest = gMovieDirectDrawSurfaceBuffer1 + dword_6B401B + _mveBW * dword_6B401F;
     }
 
+    constexpr auto getOffset = [](uint16_t v) {
+        return static_cast<int8_t>(v & 0xFF) + dword_51F018[v >> 8];
+    };
+
     while (a6--) {
         v49 = a5 >> 1;
         while (v49--) {
@@ -1918,39 +1922,33 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
                         v10 = gMovieDirectDrawSurfaceBuffer2 - gMovieDirectDrawSurfaceBuffer1;
                         break;
                     case 2:
-                    case 3:
+                    case 3: {
                         byte = *a2++;
-                        v11 = word_51F618[byte];
+                        uint16_t offset = word_51F618[byte];
                         if (v7 == 3) {
-                            v11 = ((-(v11 & 0xFF)) & 0xFF) | ((-(v11 >> 8) & 0xFF) << 8);
-                        } else {
-                            v11 = v11;
+                            offset = ((-(offset & 0xFF)) & 0xFF) | ((-(offset >> 8) & 0xFF) << 8);
                         }
-                        v10 = ((v11 << 24) >> 24) + dword_51F018[v11 >> 8];
-                        break;
+                        v10 = getOffset(offset);
+                    } break;
                     case 4:
-                    case 5:
+                    case 5: {
+                        uint16_t offset;
                         if (v7 == 4) {
                             byte = *a2++;
-                            v13 = word_51F418[byte];
+                            offset = word_51F418[byte];
                         } else {
-                            v13 = *(unsigned short*)a2;
+                            offset = LoadLE16(a2);
                             a2 += 2;
                         }
 
-                        v10 = ((v13 << 24) >> 24) + dword_51F018[v13 >> 8] + (gMovieDirectDrawSurfaceBuffer2 - gMovieDirectDrawSurfaceBuffer1);
-                        break;
+                        v10 = getOffset(offset) + (gMovieDirectDrawSurfaceBuffer2 - gMovieDirectDrawSurfaceBuffer1);
+                    } break;
                     }
 
                     value2 = _mveBW;
 
-                    for (i = 0; i < 8; i++) {
-                        src_ptr = (unsigned int*)(dest + v10);
-                        dest_ptr = (unsigned int*)dest;
-
-                        dest_ptr[0] = src_ptr[0];
-                        dest_ptr[1] = src_ptr[1];
-
+                    for (i = 0; i < 8; ++i) {
+                        memcpy(dest, dest + v10, 8);
                         dest += value2;
                     }
 
@@ -2669,11 +2667,8 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
                 case 11:
                     value2 = _mveBW;
 
-                    src_ptr = (unsigned int*)a2;
-                    for (i = 0; i < 8; i++) {
-                        dest_ptr = (unsigned int*)dest;
-                        dest_ptr[0] = src_ptr[i * 2];
-                        dest_ptr[1] = src_ptr[i * 2 + 1];
+                    for (i = 0; i < 32; i += 4) {
+                        memcpy(dest, &a2[i * 2], 8);
                         dest += value2;
                     }
 
@@ -2763,7 +2758,7 @@ static void _nfPkDecomp(unsigned char* a1, unsigned char* a2, int a3, int a4, in
                         value1 = byte | (byte << 8) | (byte << 16) | (byte << 24);
                         value2 = value1;
                     } else {
-                        byte = *(unsigned short*)a2;
+                        byte = LoadLE16(a2);
                         a2 += 2;
                         value1 = byte | (byte << 16);
                         value2 = value1;
