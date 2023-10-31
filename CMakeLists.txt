@@ -20,10 +20,22 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS NO)
 
+option(ASAN "Enable address sanitizer" OFF)
+option(UBSAN "Enable undefined behaviour sanitizer" OFF)
+
 if (ANDROID)
     add_library(${EXECUTABLE_NAME} SHARED)
 else()
     add_executable(${EXECUTABLE_NAME} WIN32 MACOSX_BUNDLE)
+endif()
+
+if(ASAN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=address;-fsanitize-recover=address")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=address;-fsanitize-recover=address")
+endif()
+if(UBSAN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
 endif()
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC src)
