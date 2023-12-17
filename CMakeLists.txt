@@ -347,7 +347,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0")
 endif()
 
-if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD"))
+if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD"))
     add_subdirectory("third_party/sdl2")
 else()
     find_package(SDL2)
