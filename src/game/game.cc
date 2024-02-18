@@ -1246,7 +1246,7 @@ static int game_init_databases()
 
     master_db_handle = db_init(main_file_name, NULL, patch_file_name, 1);
     if (master_db_handle == INVALID_DATABASE_HANDLE) {
-        GNWSystemError("Could not find the master datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+        GNWSystemError("Could not find MASTER.DAT. Please make sure that you are running FALLOUT from the directory you installed it to.");
         return -1;
     }
 
@@ -1263,7 +1263,7 @@ static int game_init_databases()
     critter_db_handle = db_init(main_file_name, NULL, patch_file_name, 1);
     if (critter_db_handle == INVALID_DATABASE_HANDLE) {
         db_select(master_db_handle);
-        GNWSystemError("Could not find the critter datafile. Please make sure the FALLOUT CD is in the drive and that you are running FALLOUT from the directory you installed it to.");
+        GNWSystemError("Could not find CRITTER.DAT. Please make sure that you are running FALLOUT from the directory you installed it to.");
         return -1;
     }
 
