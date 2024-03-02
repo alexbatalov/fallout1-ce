@@ -16,6 +16,15 @@ Download and copy `fallout-ce.exe` to your `Fallout` folder. It serves as a drop
 
 - Use Windows installation as a base - it contains data assets needed to play. Copy `Fallout` folder somewhere, for example `/home/john/Desktop/Fallout`.
 
+- Alternatively you can extract the needed files from the GoG installer. First open a console and run the following
+
+```console
+$ sudo apt install innoextract
+$ innoextract ~/Downloads/setup_fallout_2.1.0.18.exe -I app
+$ mv app Fallout
+$ cd Fallout
+```
+
 - Download and copy `fallout-ce` to this folder.
 
 - Install [SDL2](https://libsdl.org/download-2.0.php):
