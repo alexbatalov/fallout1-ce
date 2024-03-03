@@ -17,17 +17,17 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 11
           cache: gradle
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: os/android/app/.cxx
           key: android-cmake-v1
@@ -51,7 +51,7 @@ jobs:
         run: |
           cd os/android/app/build/outputs/apk/release
           cp app-release.apk fallout-ce-android.apk
-          gh release upload ${{ github.ref_name }} fallout-ce-android.apk
+          gh release upload ${{ github.event.release.tag_name }} fallout-ce-android.apk
           rm fallout-ce-android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,14 +59,14 @@ jobs:
   ios:
     name: iOS
 
-    runs-on: macos-11
+    runs-on: macos-12
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: ios-cmake-v1
@@ -75,25 +75,31 @@ jobs:
         run: |
           cmake \
             -B build \
-            -D CMAKE_BUILD_TYPE=RelWithDebInfo \
             -D CMAKE_TOOLCHAIN_FILE=cmake/toolchain/ios.toolchain.cmake \
             -D ENABLE_BITCODE=0 \
             -D PLATFORM=OS64 \
+            -G Xcode \
+            -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY='' \
             # EOL
 
       - name: Build
         run: |
           cmake \
             --build build \
+            --config RelWithDebInfo \
             -j $(sysctl -n hw.physicalcpu) \
-            --target package \
             # EOL
+
+      - name: Pack
+        run: |
+          cd build
+          cpack -C RelWithDebInfo
 
       - name: Upload
         run: |
           cd build
-          cp fallout-ce.zip fallout-ce-ios.ipa
-          gh release upload ${{ github.ref_name }} fallout-ce-ios.ipa
+          cp fallout-ce.ipa fallout-ce-ios.ipa
+          gh release upload ${{ github.event.release.tag_name }} fallout-ce-ios.ipa
           rm fallout-ce-ios.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +118,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Dependencies (x86)
         if: matrix.arch == 'x86'
@@ -129,7 +135,7 @@ jobs:
           sudo apt install libsdl2-dev zlib1g-dev
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: linux-${{ matrix.arch }}-cmake-v1
@@ -162,7 +168,7 @@ jobs:
         run: |
           cd build
           tar -czvf fallout-ce-linux-${{ matrix.arch }}.tar.gz fallout-ce
-          gh release upload ${{ github.ref_name }} fallout-ce-linux-${{ matrix.arch }}.tar.gz
+          gh release upload ${{ github.event.release.tag_name }} fallout-ce-linux-${{ matrix.arch }}.tar.gz
           rm fallout-ce-linux-${{ matrix.arch }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -174,16 +180,16 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Import code signing certificates
-        uses: apple-actions/import-codesign-certs@v1
+        uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_FILE_BASE64 }}
           p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_PASSWORD }}
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: macos-cmake-v3
@@ -192,17 +198,24 @@ jobs:
         run: |
           cmake \
             -B build \
-            -D CMAKE_BUILD_TYPE=RelWithDebInfo \
-            -D CPACK_BUNDLE_APPLE_CERT_APP="${{ secrets.APPLE_DEVELOPER_CERTIFICATE_IDENTITY }}" \
+            -G Xcode \
+            -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY="${{ secrets.APPLE_DEVELOPER_CERTIFICATE_IDENTITY }}" \
+            -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_INJECT_BASE_ENTITLEMENTS="NO" \
+            -D CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS="--options=runtime --timestamp" \
             # EOL
 
       - name: Build
         run: |
           cmake \
             --build build \
+            --config RelWithDebInfo \
             -j $(sysctl -n hw.physicalcpu) \
-            --target package \
             # EOL
+
+      - name: Pack
+        run: |
+          cd build
+          cpack -C RelWithDebInfo
 
       - name: Notarize
         run: |
@@ -210,8 +223,8 @@ jobs:
           cat << EOF > config.json
           {
             "notarize": {
-              "path": "build/fallout-ce.dmg",
-              "bundle_id": "$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" build/fallout-ce.app/Contents/Info.plist)",
+              "path": "build/Fallout Community Edition.dmg",
+              "bundle_id": "$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "build/RelWithDebInfo/Fallout Community Edition.app/Contents/Info.plist")",
               "staple": true
             }
           }
@@ -225,8 +238,8 @@ jobs:
       - name: Upload
         run: |
           cd build
-          cp fallout-ce.dmg fallout-ce-macos.dmg
-          gh release upload ${{ github.ref_name }} fallout-ce-macos.dmg
+          cp "Fallout Community Edition.dmg" fallout-ce-macos.dmg
+          gh release upload ${{ github.event.release.tag_name }} fallout-ce-macos.dmg
           rm fallout-ce-macos.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -247,10 +260,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: windows-${{ matrix.arch }}-cmake-v1
@@ -274,7 +287,7 @@ jobs:
         run: |
           cd build/RelWithDebInfo
           7z a fallout-ce-windows-${{ matrix.arch }}.zip fallout-ce.exe
-          gh release upload ${{ github.ref_name }} fallout-ce-windows-${{ matrix.arch }}.zip
+          gh release upload ${{ github.event.release.tag_name }} fallout-ce-windows-${{ matrix.arch }}.zip
           rm fallout-ce-windows-${{ matrix.arch }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
