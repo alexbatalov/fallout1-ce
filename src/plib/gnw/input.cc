@@ -1119,6 +1119,7 @@ void GNW95_process_message()
                 break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 handleWindowSizeChanged();
+                win_refresh_all(&scr_size);
                 break;
             case SDL_WINDOWEVENT_FOCUS_GAINED:
                 GNW95_isActive = true;
