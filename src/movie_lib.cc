@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "audio_engine.h"
-#include "endian.hpp"
 #include "platform_compat.h"
 
 namespace fallout {
@@ -97,6 +96,16 @@ static int _MVE_sndDecompM16(unsigned short* a1, unsigned char* a2, int a3, int 
 static int _MVE_sndDecompS16(unsigned short* a1, unsigned char* a2, int a3, int a4);
 static void _nfPkConfig();
 static void _nfPkDecomp(unsigned char* buf, unsigned char* a2, int a3, int a4, int a5, int a6);
+
+constexpr static uint16_t LoadLE16(const uint8_t* b)
+{
+    return (b[1] << 8) | b[0];
+}
+
+constexpr static uint32_t LoadLE32(const uint8_t* b)
+{
+    return (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
+}
 
 // 0x51EBD8
 static int dword_51EBD8 = 0;
