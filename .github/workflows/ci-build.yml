@@ -26,7 +26,7 @@ jobs:
           sudo apt install cppcheck
 
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: cppcheck
         run: cppcheck --std=c++17 src/
@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: clang-format
         run: find src -type f -name \*.cc -o -name \*.h | xargs clang-format --dry-run --Werror
@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -60,7 +60,7 @@ jobs:
           cache: gradle
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: os/android/app/.cxx
           key: android-cmake-v1
@@ -81,7 +81,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fallout-ce-debug.apk
           path: os/android/app/build/outputs/apk/debug/app-debug.apk
@@ -94,10 +94,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: ios-cmake-v2
@@ -128,7 +128,7 @@ jobs:
           cpack -C RelWithDebInfo
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fallout-ce.ipa
           path:  build/fallout-ce.ipa
@@ -148,7 +148,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Dependencies (x86)
         if: matrix.arch == 'x86'
@@ -165,7 +165,7 @@ jobs:
           sudo apt install libsdl2-dev zlib1g-dev
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: linux-${{ matrix.arch }}-cmake-v1
@@ -195,7 +195,7 @@ jobs:
             # EOL
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fallout-ce-linux-${{ matrix.arch }}
           path:  build/fallout-ce
@@ -208,10 +208,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: macos-cmake-v4
@@ -238,7 +238,7 @@ jobs:
           cpack -C RelWithDebInfo
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fallout-ce-macos.dmg
           path:  build/Fallout Community Edition.dmg
@@ -260,10 +260,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache cmake build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: windows-${{ matrix.arch }}-cmake-v1
@@ -284,7 +284,7 @@ jobs:
             # EOL
 
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fallout-ce-windows-${{ matrix.arch }}
           path:  build/RelWithDebInfo/fallout-ce.exe

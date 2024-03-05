@@ -20,10 +20,22 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS NO)
 
+option(ASAN "Enable address sanitizer" OFF)
+option(UBSAN "Enable undefined behaviour sanitizer" OFF)
+
 if (ANDROID)
     add_library(${EXECUTABLE_NAME} SHARED)
 else()
     add_executable(${EXECUTABLE_NAME} WIN32 MACOSX_BUNDLE)
+endif()
+
+if(ASAN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=address;-fsanitize-recover=address")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=address;-fsanitize-recover=address")
+endif()
+if(UBSAN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
 endif()
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC src)
@@ -336,7 +348,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0")
 endif()
 
-if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD"))
+if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD"))
     add_subdirectory("third_party/sdl2")
 else()
     find_package(SDL2)
@@ -359,13 +371,6 @@ if(APPLE)
         set(CPACK_ARCHIVE_FILE_EXTENSION "ipa")
     else()
         install(TARGETS ${EXECUTABLE_NAME} DESTINATION .)
-
-        if (CPACK_BUNDLE_APPLE_CERT_APP)
-            install(CODE "
-                execute_process(COMMAND codesign --deep --force --options runtime --sign \"${CPACK_BUNDLE_APPLE_CERT_APP}\" ${CMAKE_BINARY_DIR}/Fallout Community Edition.app)
-                "
-                COMPONENT Runtime)
-        endif()
 
         set(CPACK_GENERATOR "DragNDrop")
         set(CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK ON)

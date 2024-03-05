@@ -16,6 +16,14 @@ Download and copy `fallout-ce.exe` to your `Fallout` folder. It serves as a drop
 
 - Use Windows installation as a base - it contains data assets needed to play. Copy `Fallout` folder somewhere, for example `/home/john/Desktop/Fallout`.
 
+- Alternatively you can extract the needed files from the GoG installer:
+
+```console
+$ sudo apt install innoextract
+$ innoextract ~/Downloads/setup_fallout_2.1.0.18.exe -I app
+$ mv app Fallout
+```
+
 - Download and copy `fallout-ce` to this folder.
 
 - Install [SDL2](https://libsdl.org/download-2.0.php):
@@ -33,6 +41,14 @@ $ sudo apt install libsdl2-2.0-0
 - Use Windows installation as a base - it contains data assets needed to play. Copy `Fallout` folder somewhere, for example `/Applications/Fallout`.
 
 - Alternatively you can use Fallout from MacPlay/The Omni Group as a base - you need to extract game assets from the original bundle. Mount CD/DMG, right click `Fallout` -> `Show Package Contents`, navigate to `Contents/Resources`. Copy `GameData` folder somewhere, for example `/Applications/Fallout`.
+
+- Or if you're a Terminal user and have Homebrew installed you can extract the needed files from the GoG installer:
+
+```console
+$ brew install innoextract
+$ innoextract ~/Downloads/setup_fallout_2.1.0.18.exe -I app
+$ mv app /Applications/Fallout
+```
 
 - Download and copy `fallout-ce.app` to this folder.
 

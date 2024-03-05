@@ -759,10 +759,12 @@ size_t db_fread(void* ptr, size_t size, size_t count, DB_FILE* stream)
                         if (elements_read != 0) {
                             if (fseek(stream->database->stream, stream->field_18, SEEK_SET) == 0) {
                                 if (read_callback != NULL) {
-                                    // FIXME: Probably error - mixing elements and
-                                    // bytes in `elements_read` without resetting.
                                     remaining_size = elements_read * size;
                                     chunk_size = read_threshold - read_count;
+
+                                    // CE: Reuse `elements_read` to represent
+                                    // number of bytes read.
+                                    elements_read = 0;
 
                                     while (remaining_size >= chunk_size) {
                                         bytes_read = fread(buf, 1, chunk_size, stream->database->stream);
