@@ -2577,6 +2577,7 @@ static int db_findfirst(const char* path, DB_FIND_DATA* findData)
     char basePath[COMPAT_MAX_PATH];
     compat_makepath(basePath, drive, dir, NULL, NULL);
 
+    compat_resolve_path(basePath);
     findData->dir = opendir(basePath);
     if (findData->dir == NULL) {
         return -1;
