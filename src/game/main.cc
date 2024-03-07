@@ -107,7 +107,7 @@ int gnw_main(int argc, char** argv)
 
         while (!done) {
             kb_clear();
-            gsound_background_play_level_music("07desert", 11);
+            gsound_background_play_level_music("07DESERT", 11);
             main_menu_show(1);
 
             mouse_show();
