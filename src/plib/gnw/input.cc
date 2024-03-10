@@ -1149,6 +1149,13 @@ void GNW95_process_message()
             if (ptr->time != -1) {
                 unsigned int elapsedTime = ptr->time > tick ? INT_MAX : tick - ptr->time;
                 unsigned int delay = ptr->count == 0 ? GNW95_repeat_delay : GNW95_repeat_rate;
+                switch (key) {
+                case SDL_SCANCODE_LEFT:
+                case SDL_SCANCODE_RIGHT:
+                case SDL_SCANCODE_UP:
+                case SDL_SCANCODE_DOWN:
+                    delay = 0;
+                }
                 if (elapsedTime > delay) {
                     keyboardData.key = key;
                     keyboardData.down = 1;
