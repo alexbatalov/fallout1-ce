@@ -49,7 +49,11 @@ $ brew install innoextract
 $ innoextract ~/Downloads/setup_fallout_2.1.0.18.exe -I app
 $ mv app /Applications/Fallout
 ```
-
+- Alternatively, for *GOG Offline Backup Game Installers*:
+  - Download `Fallout (Part 1 of 2)`
+  - Extract the .exe file using something like [Extractor](https://www.macsourceports.com/utility/extractor) to a folder, for example `/Applications/Fallout`.
+  - *NOTE: `innoextract` will not work on this exe*
+  
 - Download and copy `fallout-ce.app` to this folder.
 
 - Run `fallout-ce.app`.
