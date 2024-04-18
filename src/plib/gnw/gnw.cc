@@ -157,6 +157,7 @@ int win_init(VideoOptions* video_options, int flags)
     if (GNW_input_init(flags) == -1) {
         return WINDOW_MANAGER_ERR_INITIALIZING_INPUT;
     }
+    mouseSetWindowScale(video_options->scale);
 
     GNW_intr_init();
 
