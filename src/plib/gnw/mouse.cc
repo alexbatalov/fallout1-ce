@@ -123,6 +123,8 @@ static char mouse_trans;
 static int gMouseWheelX = 0;
 static int gMouseWheelY = 0;
 
+static int gWindowScale = 1;
+
 // 0x4B4780
 int GNW_mouse_init()
 {
@@ -798,7 +800,7 @@ bool mouse_is_disabled()
 void mouse_set_sensitivity(double value)
 {
     if (value > 0 && value < 2.0) {
-        mouse_sensitivity = value;
+        mouse_sensitivity = value / gWindowScale;
     }
 }
 
@@ -873,6 +875,11 @@ void convertMouseWheelToArrowKey(int* keyCodePtr)
             }
         }
     }
+}
+
+void mouseSetWindowScale(int scale)
+{
+    gWindowScale = scale;
 }
 
 } // namespace fallout
