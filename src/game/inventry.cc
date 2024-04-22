@@ -3179,7 +3179,7 @@ void inven_obj_examine_func(Object* critter, Object* item)
     char* itemName = object_name(item);
     inven_display_msg(itemName);
 
-    // Increment line counter to accomodate separator below.
+    // Increment line counter to accommodate separator below.
     inven_display_msg_line += 1;
 
     int lineHeight = text_height();
