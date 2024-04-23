@@ -19,6 +19,7 @@ typedef struct VideoOptions {
     int height;
     bool fullscreen;
     int scale;
+    bool exclusive;
 } VideoOptions;
 
 } // namespace fallout

@@ -148,6 +148,7 @@ int game_init(const char* windowTitle, bool isMapper, int font, int flags, int a
     video_options.height = 480;
     video_options.fullscreen = true;
     video_options.scale = 1;
+    video_options.exclusive = 1;
 
     Config resolutionConfig;
     if (config_init(&resolutionConfig)) {
@@ -165,6 +166,11 @@ int game_init(const char* windowTitle, bool isMapper, int font, int flags, int a
             bool windowed;
             if (configGetBool(&resolutionConfig, "MAIN", "WINDOWED", &windowed)) {
                 video_options.fullscreen = !windowed;
+            }
+
+            bool exclusive;
+            if (configGetBool(&resolutionConfig, "MAIN", "EXCLUSIVE", &exclusive)) {
+                video_options.exclusive = exclusive;
             }
 
             int scaleValue;
