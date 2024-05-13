@@ -42,17 +42,22 @@ $ sudo apt install libsdl2-2.0-0
 
 - Alternatively you can use Fallout from MacPlay/The Omni Group as a base - you need to extract game assets from the original bundle. Mount CD/DMG, right click `Fallout` -> `Show Package Contents`, navigate to `Contents/Resources`. Copy `GameData` folder somewhere, for example `/Applications/Fallout`.
 
-- Or if you're a Terminal user and have Homebrew installed you can extract the needed files from the GoG installer:
+- Or if you're a Terminal user and have Homebrew installed you can extract the needed files from the GoG installer - note that you will need to download both parts of the Offline Installer.
+
+- To do the GoG extraction:
 
 ```console
+$ mkdir /Applications/Fallout
 $ brew install innoextract
-$ innoextract ~/Downloads/setup_fallout_2.1.0.18.exe -I app
-$ mv app /Applications/Fallout
+$ innoextract ~/Downloads/setup_fallout_1.2_\(27130\).exe -d /Applications/Fallout
 ```
 
-- Download and copy `fallout-ce.app` to this folder.
+- Download the `fallout-ce-macos.dmg`
 
-- Run `fallout-ce.app`.
+- Open it, pull the Fallout Community Edition app icon into `/Applications/Fallout`
+
+- Running the app will now successfully start the game.
+
 
 ### Android
 
