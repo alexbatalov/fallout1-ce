@@ -965,7 +965,7 @@ static int protinst_default_use_item(Object* a1, Object* a2, Object* item)
 
     messageListItem.num = 582;
     if (message_search(&proto_main_msg_file, &messageListItem)) {
-        snprintf(formattedText, sizeof(formattedText), messageListItem.text);
+        snprintf(formattedText, sizeof(formattedText), "%s", messageListItem.text);
         display_print(formattedText);
     }
     return -1;
