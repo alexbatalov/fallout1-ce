@@ -254,6 +254,7 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
 
         if (description == NULL || *description == '\0') {
             MessageListItem messageListItem;
+            // 493: You see nothing out of the ordinary.
             messageListItem.num = 493;
             if (!message_search(&proto_main_msg_file, &messageListItem)) {
                 debug_printf("\nError: Can't find msg num!");
@@ -278,11 +279,12 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
             MessageListItem hpMessageListItem;
 
             if (critter_body_type(target) != BODY_TYPE_BIPED) {
-                // It has %d/%d hps
+                // 537: It has %d/%d hps
                 hpMessageListItem.num = 537;
             } else {
                 // 535: He has %d/%d hps
                 // 536: She has %d/%d hps
+                // 537: It has %d/%d hps (GENDER_COUNT)
                 hpMessageListItem.num = 535 + stat_level(target, STAT_GENDER);
             }
 
@@ -300,9 +302,11 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
                 MessageListItem weaponMessageListItem;
 
                 if (item_w_caliber(item2) != 0) {
-                    weaponMessageListItem.num = 547; // and is wielding a %s with %d/%d shots of %s.
+                    // 547: and is wielding a %s with %d/%d shots of %s.
+                    weaponMessageListItem.num = 547; 
                 } else {
-                    weaponMessageListItem.num = 546; // and is wielding a %s.
+                    // 546: and is wielding a %s.
+                    weaponMessageListItem.num = 546; 
                 }
 
                 if (!message_search(&proto_main_msg_file, &weaponMessageListItem)) {
@@ -343,9 +347,11 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
                 MessageListItem endingMessageListItem;
 
                 if (critter_is_crippled(target)) {
-                    endingMessageListItem.num = 544; // ,
+                    // 544: , (Comma)
+                    endingMessageListItem.num = 544; 
                 } else {
-                    endingMessageListItem.num = 545; // .
+                    // 545: . (Period)
+                    endingMessageListItem.num = 545;
                 }
 
                 if (!message_search(&proto_main_msg_file, &endingMessageListItem)) {
@@ -377,6 +383,11 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
             }
 
             MessageListItem hpMessageListItem;
+            // 500: Dead
+            // 501: Almost Dead
+            // 502: Severely Wounded
+            // 503: Wounded
+            // 504: Unhurt
             hpMessageListItem.num = 500 + v16;
             if (!message_search(&proto_main_msg_file, &hpMessageListItem)) {
                 debug_printf("\nError: Can't find msg num!");
@@ -384,7 +395,7 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
             }
 
             if (v16 > 4) {
-                // Error: lookup_val out of range
+                // 550: \nError: lookup_val out of range
                 hpMessageListItem.num = 550;
                 if (!message_search(&proto_main_msg_file, &hpMessageListItem)) {
                     debug_printf("\nError: Can't find msg num!");
@@ -397,7 +408,8 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
 
             MessageListItem v66;
             if (target == obj_dude) {
-                // You look %s
+                // 520: You look %s.
+                // 518: You look: %s
                 v66.num = 520 + v12;
                 if (!message_search(&proto_main_msg_file, &v66)) {
                     debug_printf("\nError: Can't find msg num!");
@@ -406,21 +418,17 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
 
                 snprintf(formattedText, sizeof(formattedText), v66.text, hpMessageListItem.text);
             } else {
-                // %s %s
-                v66.num = 521 + v12;
-                if (!message_search(&proto_main_msg_file, &v66)) {
-                    debug_printf("\nError: Can't find msg num!");
-                    exit(1);
-                }
-
                 MessageListItem v63;
+                // 522: He looks: %s.
+                // 523: She looks: %s.
+                // 524: It looks: %s.
                 v63.num = 522 + stat_level(target, STAT_GENDER);
                 if (!message_search(&proto_main_msg_file, &v63)) {
                     debug_printf("\nError: Can't find msg num!");
                     exit(1);
                 }
 
-                snprintf(formattedText, sizeof(formattedText), v66.text, v63.text, hpMessageListItem.text);
+                snprintf(formattedText, sizeof(formattedText), v63.text, hpMessageListItem.text);
             }
         }
 
@@ -429,9 +437,13 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
             const int currentHitPoints = stat_level(target, STAT_CURRENT_HIT_POINTS);
 
             MessageListItem v63;
+            // 530: and has crippled limbs.
+            // 531: but has crippled limbs.
             v63.num = maxiumHitPoints >= currentHitPoints ? 531 : 530;
 
             if (target == obj_dude) {
+                // 532: and have crippled limbs.
+                // 534: but have crippled limbs.
                 v63.num += 2;
             }
 
@@ -449,6 +461,7 @@ int obj_examine_func(Object* critter, Object* target, void (*fn)(char* string))
         if (itemType == ITEM_TYPE_WEAPON) {
             if (item_w_caliber(target) != 0) {
                 MessageListItem weaponMessageListItem;
+                // 526: It has %d/%d shots of %s.
                 weaponMessageListItem.num = 526;
 
                 if (!message_search(&proto_main_msg_file, &weaponMessageListItem)) {
