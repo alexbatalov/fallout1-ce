@@ -1241,6 +1241,12 @@ static void kb_map_ascii_English_US()
     ascii_table[SDL_SCANCODE_PRIOR].right_alt = KEY_ALT_PAGE_UP;
     ascii_table[SDL_SCANCODE_PRIOR].ctrl = KEY_CTRL_PAGE_UP;
 
+    ascii_table[SDL_SCANCODE_PAGEUP].normal = KEY_PAGE_UP;
+    ascii_table[SDL_SCANCODE_PAGEUP].shift = KEY_PAGE_UP;
+    ascii_table[SDL_SCANCODE_PAGEUP].left_alt = KEY_ALT_PAGE_UP;
+    ascii_table[SDL_SCANCODE_PAGEUP].right_alt = KEY_ALT_PAGE_UP;
+    ascii_table[SDL_SCANCODE_PAGEUP].ctrl = KEY_CTRL_PAGE_UP;
+
     ascii_table[SDL_SCANCODE_DELETE].normal = KEY_DELETE;
     ascii_table[SDL_SCANCODE_DELETE].shift = KEY_DELETE;
     ascii_table[SDL_SCANCODE_DELETE].left_alt = KEY_ALT_DELETE;
