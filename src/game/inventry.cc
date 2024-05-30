@@ -447,16 +447,39 @@ void handle_inventory()
 
         if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X) {
             game_quit_with_confirm();
+        } else if (keyCode == KEY_HOME) {
+            stack_offset[curr_stack] = 0;
+            display_inventory(0, -1, INVENTORY_WINDOW_TYPE_NORMAL);
         } else if (keyCode == KEY_ARROW_UP) {
             if (stack_offset[curr_stack] > 0) {
                 stack_offset[curr_stack] -= 1;
                 display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_NORMAL);
             }
+        } else if (keyCode == KEY_PAGE_UP) {
+            stack_offset[curr_stack] -= inven_cur_disp;
+            if (stack_offset[curr_stack] < 0) {
+                stack_offset[curr_stack] = 0;
+            }
+            display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_NORMAL);
+        } else if (keyCode == KEY_END) {
+            if (pud->length > inven_cur_disp) {
+                stack_offset[curr_stack] = pud->length - inven_cur_disp;
+                display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_NORMAL);
+            }
         } else if (keyCode == KEY_ARROW_DOWN) {
-            if (inven_cur_disp + stack_offset[curr_stack] < pud->length) {
+            if (stack_offset[curr_stack] + inven_cur_disp < pud->length) {
                 stack_offset[curr_stack] += 1;
                 display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_NORMAL);
             }
+        } else if (keyCode == KEY_PAGE_DOWN) {
+            stack_offset[curr_stack] += inven_cur_disp;
+            if (stack_offset[curr_stack] + inven_cur_disp >= pud->length) {
+                stack_offset[curr_stack] = pud->length - inven_cur_disp;
+                if (stack_offset[curr_stack] < 0) {
+                    stack_offset[curr_stack] = 0;
+                }
+            }
+            display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_NORMAL);            
         } else if (keyCode == 2500) {
             container_exit(keyCode, INVENTORY_WINDOW_TYPE_NORMAL);
         } else {
@@ -2313,8 +2336,8 @@ void use_inventory_on(Object* a1)
             stack_offset[curr_stack] -= inven_cur_disp;
             if (stack_offset[curr_stack] < 0) {
                 stack_offset[curr_stack] = 0;
-                display_inventory(stack_offset[curr_stack], -1, 1);
             }
+            display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_USE_ITEM_ON);
             break;
         case KEY_END:
             stack_offset[curr_stack] = pud->length - inven_cur_disp;
@@ -3739,7 +3762,7 @@ int loot_container(Object* a1, Object* a2)
                         18,
                         -1,
                         -1,
-                        KEY_PAGE_UP,
+                        KEY_ARROW_LEFT,
                         -1,
                         buttonUpData,
                         buttonDownData,
@@ -3765,7 +3788,7 @@ int loot_container(Object* a1, Object* a2)
                         18,
                         -1,
                         -1,
-                        KEY_PAGE_DOWN,
+                        KEY_ARROW_RIGHT,
                         -1,
                         buttonUpData,
                         buttonDownData,
@@ -3831,12 +3854,21 @@ int loot_container(Object* a1, Object* a2)
                     }
                 }
             }
+        } else if (keyCode == KEY_HOME) {
+            stack_offset[curr_stack] = 0;
+            display_inventory(0, -1, INVENTORY_WINDOW_TYPE_LOOT);
         } else if (keyCode == KEY_ARROW_UP) {
             if (stack_offset[curr_stack] > 0) {
                 stack_offset[curr_stack] -= 1;
                 display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);
             }
         } else if (keyCode == KEY_PAGE_UP) {
+            stack_offset[curr_stack] -= inven_cur_disp;
+            if (stack_offset[curr_stack] < 0) {
+                stack_offset[curr_stack] = 0;
+            }
+            display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);
+        } else if (keyCode == KEY_ARROW_LEFT) {
             if (critterCount != 0) {
                 if (critterIndex > 0) {
                     critterIndex -= 1;
@@ -3853,12 +3885,26 @@ int loot_container(Object* a1, Object* a2)
                 display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);
                 display_body(a2->fid, INVENTORY_WINDOW_TYPE_LOOT);
             }
+        } else if (keyCode == KEY_END) {
+            if (pud->length > inven_cur_disp) {
+                stack_offset[curr_stack] = pud->length - inven_cur_disp;
+                display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);
+            }
         } else if (keyCode == KEY_ARROW_DOWN) {
             if (stack_offset[curr_stack] + inven_cur_disp < pud->length) {
                 stack_offset[curr_stack] += 1;
                 display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);
             }
         } else if (keyCode == KEY_PAGE_DOWN) {
+            stack_offset[curr_stack] += inven_cur_disp;
+            if (stack_offset[curr_stack] + inven_cur_disp >= pud->length) {
+                stack_offset[curr_stack] = pud->length - inven_cur_disp;
+                if (stack_offset[curr_stack] < 0) {
+                    stack_offset[curr_stack] = 0;
+                }
+            }
+            display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);            
+        } else if (keyCode == KEY_ARROW_RIGHT) {
             if (critterCount != 0) {
                 if (critterIndex < critterCount - 1) {
                     critterIndex += 1;
@@ -5124,7 +5170,7 @@ static int do_move_timer(int inventoryWindowType, Object* item, int max)
 
     draw_amount(value, inventoryWindowType);
 
-    bool v5 = false;
+    bool numbersEntered = false;
     for (;;) {
         sharedFpsLimiter.mark();
 
@@ -5143,12 +5189,12 @@ static int do_move_timer(int inventoryWindowType, Object* item, int max)
             }
 
             gsound_play_sfx_file("iisxxxx1");
-        } else if (keyCode == 5000) {
-            v5 = false;
+        } else if (keyCode == KEY_UPPERCASE_A || keyCode == KEY_LOWERCASE_A) {
+            numbersEntered = false;
             value = max;
             draw_amount(value, inventoryWindowType);
-        } else if (keyCode == 6000) {
-            v5 = false;
+        } else if (keyCode == KEY_ARROW_UP) {
+            numbersEntered = false;
             if (value < max) {
                 if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
                     value += 1;
@@ -5159,8 +5205,8 @@ static int do_move_timer(int inventoryWindowType, Object* item, int max)
                 draw_amount(value, inventoryWindowType);
                 continue;
             }
-        } else if (keyCode == 7000) {
-            v5 = false;
+        } else if (keyCode == KEY_ARROW_DOWN) {
+            numbersEntered = false;
             if (value > min) {
                 if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
                     value -= 1;
@@ -5176,22 +5222,22 @@ static int do_move_timer(int inventoryWindowType, Object* item, int max)
         if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
             if (keyCode >= KEY_0 && keyCode <= KEY_9) {
                 int number = keyCode - KEY_0;
-                if (!v5) {
+                if (!numbersEntered) {
                     value = 0;
                 }
 
                 value = 10 * value % 1000 + number;
-                v5 = true;
+                numbersEntered = true;
 
                 draw_amount(value, inventoryWindowType);
                 continue;
             } else if (keyCode == KEY_BACKSPACE) {
-                if (!v5) {
+                if (!numbersEntered) {
                     value = 0;
                 }
 
                 value /= 10;
-                v5 = true;
+                numbersEntered = true;
 
                 draw_amount(value, inventoryWindowType);
                 continue;
@@ -5291,7 +5337,7 @@ static int setup_move_timer_win(int inventoryWindowType, Object* item)
     buttonDownData = art_ptr_lock_data(fid, 0, 0, &(mt_key[1]));
 
     if (buttonUpData != NULL && buttonDownData != NULL) {
-        btn = win_register_button(mt_wid, x, y, 16, 12, -1, -1, 6000, -1, buttonUpData, buttonDownData, NULL, BUTTON_FLAG_TRANSPARENT);
+        btn = win_register_button(mt_wid, x, y, 16, 12, -1, -1, KEY_ARROW_UP, -1, buttonUpData, buttonDownData, NULL, BUTTON_FLAG_TRANSPARENT);
         if (btn != -1) {
             win_register_button_sound_func(btn, gsound_red_butt_press, gsound_red_butt_release);
         }
@@ -5348,7 +5394,7 @@ static int setup_move_timer_win(int inventoryWindowType, Object* item)
                 text_to_buf(buttonUpData + (94 - length) / 2 + 376, messageListItem.text, 200, 94, colorTable[21091]);
                 text_to_buf(buttonDownData + (94 - length) / 2 + 376, messageListItem.text, 200, 94, colorTable[18977]);
 
-                btn = win_register_button(mt_wid, 120, 80, 94, 33, -1, -1, -1, 5000, buttonUpData, buttonDownData, NULL, BUTTON_FLAG_TRANSPARENT);
+                btn = win_register_button(mt_wid, 120, 80, 94, 33, -1, -1, -1, KEY_UPPERCASE_A, buttonUpData, buttonDownData, NULL, BUTTON_FLAG_TRANSPARENT);
                 if (btn != -1) {
                     win_register_button_sound_func(btn, gsound_red_butt_press, gsound_red_butt_release);
                 }
