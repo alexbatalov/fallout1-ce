@@ -384,17 +384,15 @@ static int inventry_msg_unload()
     return 0;
 }
 
-bool handle_inventory_scroll_key(int keyCode, int& offset, int inventoryWindowType)
+static bool handle_scroll_key(int keyCode, int& offset, int length)
 {
     switch (keyCode) {
     case KEY_HOME:
         offset = 0;
-        display_inventory(0, -1, inventoryWindowType);
         break;
     case KEY_ARROW_UP:
         if (offset > 0) {
             offset -= 1;
-            display_inventory(offset, -1, inventoryWindowType);
         }
         break;
     case KEY_PAGE_UP:
@@ -402,35 +400,71 @@ bool handle_inventory_scroll_key(int keyCode, int& offset, int inventoryWindowTy
         if (offset < 0) {
             offset = 0;
         }
-        display_inventory(offset, -1, inventoryWindowType);
         break;
     case KEY_END:
-        offset = pud->length - inven_cur_disp;
+        offset = length - inven_cur_disp;
         if (offset < 0) {
             offset = 0;
         }
-        display_inventory(offset, -1, inventoryWindowType);
         break;
     case KEY_ARROW_DOWN:
-        if (offset + inven_cur_disp < pud->length) {
+        if (offset + inven_cur_disp < length) {
             offset += 1;
-            display_inventory(offset, -1, inventoryWindowType);
         }
         break;
     case KEY_PAGE_DOWN:
         offset += inven_cur_disp;
-        if (offset + inven_cur_disp >= pud->length) {
-            offset = pud->length - inven_cur_disp;
+        if (offset + inven_cur_disp >= length) {
+            offset = length - inven_cur_disp;
             if (offset < 0) {
                 offset = 0;
             }
         }
-        display_inventory(offset, -1, inventoryWindowType);
         break;
     default:
         return false;
     }
     return true;
+}
+
+static bool handle_inventory_scroll_key(int keyCode, int& offset, Inventory* pud, int inventoryWindowType)
+{
+    if (handle_scroll_key(keyCode, offset, pud->length)) {
+        display_inventory(offset, -1, inventoryWindowType);
+        return true;
+    }
+    return false;
+}
+
+static int map_target_inventory_scroll_key_to_source(int keyCode)
+{
+    switch (keyCode) {
+    case KEY_CTRL_HOME:
+        return KEY_HOME;
+    case KEY_CTRL_ARROW_UP:
+        return KEY_ARROW_UP;
+    case KEY_CTRL_PAGE_UP:
+        return KEY_PAGE_UP;
+    case KEY_CTRL_END:
+        return KEY_END;
+    case KEY_CTRL_ARROW_DOWN:
+        return KEY_ARROW_DOWN;
+    case KEY_CTRL_PAGE_DOWN:
+        return KEY_PAGE_DOWN;
+    default:
+        return keyCode;
+    }
+}
+
+static bool handle_target_inventory_scroll_key(int keyCode, int& offset, Inventory* pud, int inventoryWindowType)
+{
+    keyCode = map_target_inventory_scroll_key_to_source(keyCode);
+    if (handle_scroll_key(keyCode, offset, pud->length)) {
+        display_target_inventory(offset, -1, pud, inventoryWindowType);
+        win_draw(i_wid);
+        return true;
+    }
+    return false;
 }
 
 // 0x462480
@@ -496,7 +530,7 @@ void handle_inventory()
 
         if (keyCode == KEY_CTRL_Q || keyCode == KEY_CTRL_X) {
             game_quit_with_confirm();
-        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], INVENTORY_WINDOW_TYPE_NORMAL)) {
+        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], pud, INVENTORY_WINDOW_TYPE_NORMAL)) {
         } else if (keyCode == 2500) {
             container_exit(keyCode, INVENTORY_WINDOW_TYPE_NORMAL);
         } else {
@@ -2343,7 +2377,7 @@ void use_inventory_on(Object* a1)
             break;
         } else if (keyCode == 2500) {
             container_exit(keyCode, INVENTORY_WINDOW_TYPE_USE_ITEM_ON);
-        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], INVENTORY_WINDOW_TYPE_USE_ITEM_ON)) {
+        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], pud, INVENTORY_WINDOW_TYPE_USE_ITEM_ON)) {
         } else if ((mouse_get_buttons() & MOUSE_EVENT_RIGHT_BUTTON_DOWN) != 0) {
             if (immode == INVENTORY_WINDOW_CURSOR_HAND) {
                 inven_set_mouse(INVENTORY_WINDOW_CURSOR_ARROW);
@@ -3827,7 +3861,8 @@ int loot_container(Object* a1, Object* a2)
                     }
                 }
             }
-        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], INVENTORY_WINDOW_TYPE_LOOT)) {
+        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], pud, INVENTORY_WINDOW_TYPE_LOOT)) {
+        } else if (handle_target_inventory_scroll_key(keyCode, target_stack_offset[target_curr_stack], target_pud, INVENTORY_WINDOW_TYPE_LOOT)) {
         } else if (keyCode == KEY_ARROW_LEFT) {
             if (critterCount != 0) {
                 if (critterIndex > 0) {
@@ -3861,18 +3896,6 @@ int loot_container(Object* a1, Object* a2)
                 display_target_inventory(0, -1, target_pud, INVENTORY_WINDOW_TYPE_LOOT);
                 display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_LOOT);
                 display_body(a2->fid, INVENTORY_WINDOW_TYPE_LOOT);
-            }
-        } else if (keyCode == KEY_CTRL_ARROW_UP) {
-            if (target_stack_offset[target_curr_stack] > 0) {
-                target_stack_offset[target_curr_stack] -= 1;
-                display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_LOOT);
-                win_draw(i_wid);
-            }
-        } else if (keyCode == KEY_CTRL_ARROW_DOWN) {
-            if (target_stack_offset[target_curr_stack] + inven_cur_disp < target_pud->length) {
-                target_stack_offset[target_curr_stack] += 1;
-                display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_LOOT);
-                win_draw(i_wid);
             }
         } else if (keyCode >= 2500 && keyCode <= 2501) {
             container_exit(keyCode, INVENTORY_WINDOW_TYPE_LOOT);
@@ -4682,19 +4705,8 @@ void barter_inventory(int win, Object* a2, Object* a3, Object* a4, int a5)
                 btable_offset -= 1;
                 display_table_inventories(win, a3, a4, -1);
             }
-        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], INVENTORY_WINDOW_TYPE_TRADE)) {
-        } else if (keyCode == KEY_CTRL_ARROW_UP) {
-            if (target_stack_offset[target_curr_stack] > 0) {
-                target_stack_offset[target_curr_stack] -= 1;
-                display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
-                win_draw(i_wid);
-            }
-        } else if (keyCode == KEY_CTRL_ARROW_DOWN) {
-            if (target_stack_offset[target_curr_stack] + inven_cur_disp < target_pud->length) {
-                target_stack_offset[target_curr_stack] += 1;
-                display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
-                win_draw(i_wid);
-            }
+        } else if (handle_inventory_scroll_key(keyCode, stack_offset[curr_stack], pud, INVENTORY_WINDOW_TYPE_TRADE)) {
+        } else if (handle_target_inventory_scroll_key(keyCode, target_stack_offset[target_curr_stack], target_pud, INVENTORY_WINDOW_TYPE_TRADE)) {
         } else if (keyCode >= 2500 && keyCode <= 2501) {
             container_exit(keyCode, INVENTORY_WINDOW_TYPE_TRADE);
         } else {
