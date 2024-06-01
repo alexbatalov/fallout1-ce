@@ -5295,7 +5295,7 @@ static int setup_move_timer_win(int inventoryWindowType, Object* item)
     buttonDownData = art_ptr_lock_data(fid, 0, 0, &(mt_key[3]));
 
     if (buttonUpData != NULL && buttonDownData != NULL) {
-        btn = win_register_button(mt_wid, x, y + 12, 17, 12, -1, -1, 7000, -1, buttonUpData, buttonDownData, NULL, BUTTON_FLAG_TRANSPARENT);
+        btn = win_register_button(mt_wid, x, y + 12, 17, 12, -1, -1, KEY_ARROW_DOWN, -1, buttonUpData, buttonDownData, NULL, BUTTON_FLAG_TRANSPARENT);
         if (btn != -1) {
             win_register_button_sound_func(btn, gsound_red_butt_press, gsound_red_butt_release);
         }
