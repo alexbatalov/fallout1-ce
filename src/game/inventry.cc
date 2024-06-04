@@ -211,9 +211,9 @@ static void display_inventory_info(Object* item, int quantity, unsigned char* de
 static void inven_update_lighting(Object* a1);
 static int barter_compute_value(Object* buyer, Object* seller);
 static int barter_attempt_transaction(Object* a1, Object* a2, Object* a3, Object* a4);
-static void barter_move_inventory(Object* a1, int quantity, int a3, int a4, Object* a5, Object* a6, bool a7);
-static void barter_move_from_table_inventory(Object* item, int quantity, int index, Object* target, Object* table, bool is_peon);
-static void display_table_inventories(int win, Object* peon_table, Object* barterer_table, int index);
+static void barter_move_inventory(Object* item, int quantity, int index, int offset, Object* target, Object* table, bool is_peon, bool skipDrag, bool moveAll);
+static void barter_move_from_table_inventory(Object* item, int quantity, int index, Object* target, Object* table, bool is_peon, bool skipDrag, bool moveAll);
+static void display_table_inventories(int win, Object* peon_table, Object* barterer_table, int selected_index, int selected_quantity = 1);
 static int do_move_timer(int inventoryWindowType, Object* item, int max, int desired_quantity = 1);
 static int setup_move_timer_win(int inventoryWindowType, Object* item);
 static int exit_move_timer_win(int inventoryWindowType);
@@ -4102,7 +4102,6 @@ int inven_steal_container(Object* a1, Object* a2)
 // 0x4676C0
 int move_inventory(InventoryItem* inventoryItem, int itemIndex, Object* target, bool isPlanting, bool skipDrag, bool moveAll)
 {
-
     int quantity = inventoryItem->quantity;
     int quantityToMove = moveAll ? std::min(INVENTORY_MAX_MOVE_ITEMS, quantity) : 1;
 
@@ -4176,7 +4175,6 @@ int move_inventory(InventoryItem* inventoryItem, int itemIndex, Object* target, 
             if (!skipDrag && quantity > 1) {
                 quantityToMove = do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity, quantityToMove);
             }
-
             if (quantityToMove != -1) {
                 if (gIsSteal) {
                     if (skill_check_stealing(inven_dude, target, item, true) == 0) {
@@ -4202,7 +4200,6 @@ int move_inventory(InventoryItem* inventoryItem, int itemIndex, Object* target, 
             if (!skipDrag && quantity > 1) {
                 quantityToMove = do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity, quantityToMove);
             }
-
             if (quantityToMove != -1) {
                 if (gIsSteal) {
                     if (skill_check_stealing(inven_dude, target, item, false) == 0) {
@@ -4281,24 +4278,26 @@ static int barter_attempt_transaction(Object* a1, Object* a2, Object* a3, Object
 }
 
 // 0x467BD4
-static void barter_move_inventory(Object* a1, int quantity, int a3, int a4, Object* a5, Object* a6, bool a7)
+static void barter_move_inventory(Object* item, int quantity, int index, int offset, Object* target, Object* table, bool is_peon, bool skipDrag, bool moveAll)
 {
-    Rect rect;
-    if (a7) {
-        rect.ulx = 23;
-        rect.uly = 48 * a3 + 34;
-    } else {
-        rect.ulx = 395;
-        rect.uly = 48 * a3 + 31;
-    }
+    int quantityToMove = moveAll ? std::min(INVENTORY_MAX_MOVE_ITEMS, quantity) : 1;
 
-    if (quantity > 1) {
-        if (a7) {
-            display_inventory(a4, a3, INVENTORY_WINDOW_TYPE_TRADE);
+    if (quantity > quantityToMove) {
+        if (is_peon) {
+            display_inventory(offset, index, INVENTORY_WINDOW_TYPE_TRADE, quantityToMove);
         } else {
-            display_target_inventory(a4, a3, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
+            display_target_inventory(offset, index, target_pud, INVENTORY_WINDOW_TYPE_TRADE, quantityToMove);
         }
     } else {
+        Rect rect;
+        if (is_peon) {
+            rect.ulx = 23;
+            rect.uly = INVENTORY_SLOT_HEIGHT * index + 34;
+        } else {
+            rect.ulx = 395;
+            rect.uly = INVENTORY_SLOT_HEIGHT * index + 31;
+        }
+
         unsigned char* dest = win_get_buf(i_wid);
         unsigned char* src = win_get_buf(barter_back_win);
 
@@ -4310,38 +4309,42 @@ static void barter_move_inventory(Object* a1, int quantity, int a3, int a4, Obje
         win_draw_rect(i_wid, &rect);
     }
 
-    CacheEntry* inventoryFrmHandle;
-    int inventoryFid = item_inv_fid(a1);
-    Art* inventoryFrm = art_ptr_lock(inventoryFid, &inventoryFrmHandle);
-    if (inventoryFrm != NULL) {
-        int width = art_frame_width(inventoryFrm, 0, 0);
-        int height = art_frame_length(inventoryFrm, 0, 0);
-        unsigned char* data = art_frame_data(inventoryFrm, 0, 0);
-        mouse_set_shape(data, width, height, width, width / 2, height / 2, 0);
-        gsound_play_sfx_file("ipickup1");
-    }
+    if (!skipDrag) {
+        CacheEntry* inventoryFrmHandle;
+        int inventoryFid = item_inv_fid(item);
+        Art* inventoryFrm = art_ptr_lock(inventoryFid, &inventoryFrmHandle);
+        if (inventoryFrm != NULL) {
+            int width = art_frame_width(inventoryFrm, 0, 0);
+            int height = art_frame_length(inventoryFrm, 0, 0);
+            unsigned char* data = art_frame_data(inventoryFrm, 0, 0);
+            mouse_set_shape(data, width, height, width, width / 2, height / 2, 0);
+            gsound_play_sfx_file("ipickup1");
+        }
 
-    do {
-        sharedFpsLimiter.mark();
+        do {
+            sharedFpsLimiter.mark();
 
-        get_input();
+            get_input();
 
-        renderPresent();
-        sharedFpsLimiter.throttle();
-    } while ((mouse_get_buttons() & MOUSE_EVENT_LEFT_BUTTON_REPEAT) != 0);
+            renderPresent();
+            sharedFpsLimiter.throttle();
+        } while ((mouse_get_buttons() & MOUSE_EVENT_LEFT_BUTTON_REPEAT) != 0);
 
-    if (inventoryFrm != NULL) {
-        art_ptr_unlock(inventoryFrmHandle);
-        gsound_play_sfx_file("iputdown");
+        if (inventoryFrm != NULL) {
+            art_ptr_unlock(inventoryFrmHandle);
+            gsound_play_sfx_file("iputdown");
+        }
     }
 
     MessageListItem messageListItem;
 
-    if (a7) {
-        if (mouseHitTestInWindow(i_wid, INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_X, INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_Y)) {
-            int quantityToMove = quantity > 1 ? do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, a1, quantity) : 1;
+    if (is_peon) {
+        if (skipDrag || mouseHitTestInWindow(i_wid, INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_X, INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_INNER_LEFT_SCROLLER_TRACKING_Y)) {
+            if (!skipDrag && quantity > 1) {
+                quantityToMove = do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity, quantityToMove);
+            }
             if (quantityToMove != -1) {
-                if (item_move_force(inven_dude, a6, a1, quantityToMove) == -1) {
+                if (item_move_force(inven_dude, table, item, quantityToMove) == -1) {
                     // There is no space left for that item.
                     messageListItem.num = 26;
                     if (message_search(&inventry_message_file, &messageListItem)) {
@@ -4351,10 +4354,12 @@ static void barter_move_inventory(Object* a1, int quantity, int a3, int a4, Obje
             }
         }
     } else {
-        if (mouseHitTestInWindow(i_wid, INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_X, INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_Y)) {
-            int quantityToMove = quantity > 1 ? do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, a1, quantity) : 1;
+        if (skipDrag || mouseHitTestInWindow(i_wid, INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_X, INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_INNER_RIGHT_SCROLLER_TRACKING_Y)) {
+            if (!skipDrag && quantity > 1) {
+                quantityToMove = do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity, quantityToMove);
+            }
             if (quantityToMove != -1) {
-                if (item_move_force(a5, a6, a1, quantityToMove) == -1) {
+                if (item_move_force(target, table, item, quantityToMove) == -1) {
                     // You cannot pick that up. You are at your maximum weight capacity.
                     messageListItem.num = 25;
                     if (message_search(&inventry_message_file, &messageListItem)) {
@@ -4369,24 +4374,26 @@ static void barter_move_inventory(Object* a1, int quantity, int a3, int a4, Obje
 }
 
 // 0x467E84
-static void barter_move_from_table_inventory(Object* item, int quantity, int index, Object* target, Object* table, bool is_peon)
+static void barter_move_from_table_inventory(Object* item, int quantity, int index, Object* target, Object* table, bool is_peon, bool skipDrag, bool moveAll)
 {
-    Rect rect;
-    if (is_peon) {
-        rect.ulx = INVENTORY_TRADE_INNER_LEFT_SCROLLER_X_PAD;
-        rect.uly = INVENTORY_SLOT_HEIGHT * index + INVENTORY_TRADE_INNER_LEFT_SCROLLER_Y_PAD;
-    } else {
-        rect.ulx = INVENTORY_TRADE_INNER_RIGHT_SCROLLER_X_PAD;
-        rect.uly = INVENTORY_SLOT_HEIGHT * index + INVENTORY_TRADE_INNER_RIGHT_SCROLLER_Y_PAD;
-    }
+    int quantityToMove = moveAll ? std::min(INVENTORY_MAX_MOVE_ITEMS, quantity) : 1;
 
-    if (quantity > 1) {
+    if (quantity > quantityToMove) {
         if (is_peon) {
-            display_table_inventories(barter_back_win, table, NULL, index);
+            display_table_inventories(barter_back_win, table, NULL, index, quantityToMove);
         } else {
-            display_table_inventories(barter_back_win, NULL, table, index);
+            display_table_inventories(barter_back_win, NULL, table, index, quantityToMove);
         }
     } else {
+        Rect rect;
+        if (is_peon) {
+            rect.ulx = INVENTORY_TRADE_INNER_LEFT_SCROLLER_X_PAD;
+            rect.uly = INVENTORY_SLOT_HEIGHT * index + INVENTORY_TRADE_INNER_LEFT_SCROLLER_Y_PAD;
+        } else {
+            rect.ulx = INVENTORY_TRADE_INNER_RIGHT_SCROLLER_X_PAD;
+            rect.uly = INVENTORY_SLOT_HEIGHT * index + INVENTORY_TRADE_INNER_RIGHT_SCROLLER_Y_PAD;
+        }
+
         unsigned char* dest = win_get_buf(i_wid);
         unsigned char* src = win_get_buf(barter_back_win);
 
@@ -4403,36 +4410,40 @@ static void barter_move_from_table_inventory(Object* item, int quantity, int ind
         win_draw_rect(i_wid, &rect);
     }
 
-    CacheEntry* inventoryFrmHandle;
-    int inventoryFid = item_inv_fid(item);
-    Art* inventoryFrm = art_ptr_lock(inventoryFid, &inventoryFrmHandle);
-    if (inventoryFrm != NULL) {
-        int width = art_frame_width(inventoryFrm, 0, 0);
-        int height = art_frame_length(inventoryFrm, 0, 0);
-        unsigned char* data = art_frame_data(inventoryFrm, 0, 0);
-        mouse_set_shape(data, width, height, width, width / 2, height / 2, 0);
-        gsound_play_sfx_file("ipickup1");
-    }
+    if (!skipDrag) {
+        CacheEntry* inventoryFrmHandle;
+        int inventoryFid = item_inv_fid(item);
+        Art* inventoryFrm = art_ptr_lock(inventoryFid, &inventoryFrmHandle);
+        if (inventoryFrm != NULL) {
+            int width = art_frame_width(inventoryFrm, 0, 0);
+            int height = art_frame_length(inventoryFrm, 0, 0);
+            unsigned char* data = art_frame_data(inventoryFrm, 0, 0);
+            mouse_set_shape(data, width, height, width, width / 2, height / 2, 0);
+            gsound_play_sfx_file("ipickup1");
+        }
 
-    do {
-        sharedFpsLimiter.mark();
+        do {
+            sharedFpsLimiter.mark();
 
-        get_input();
+            get_input();
 
-        renderPresent();
-        sharedFpsLimiter.throttle();
-    } while ((mouse_get_buttons() & MOUSE_EVENT_LEFT_BUTTON_REPEAT) != 0);
+            renderPresent();
+            sharedFpsLimiter.throttle();
+        } while ((mouse_get_buttons() & MOUSE_EVENT_LEFT_BUTTON_REPEAT) != 0);
 
-    if (inventoryFrm != NULL) {
-        art_ptr_unlock(inventoryFrmHandle);
-        gsound_play_sfx_file("iputdown");
+        if (inventoryFrm != NULL) {
+            art_ptr_unlock(inventoryFrmHandle);
+            gsound_play_sfx_file("iputdown");
+        }
     }
 
     MessageListItem messageListItem;
 
     if (is_peon) {
-        if (mouseHitTestInWindow(i_wid, INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_X, INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_Y)) {
-            int quantityToMove = quantity > 1 ? do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity) : 1;
+        if (skipDrag || mouseHitTestInWindow(i_wid, INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_X, INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_LEFT_SCROLLER_TRACKING_Y)) {
+            if (!skipDrag && quantity > 1) {
+                quantityToMove = do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity, quantityToMove);
+            }
             if (quantityToMove != -1) {
                 if (item_move_force(table, inven_dude, item, quantityToMove) == -1) {
                     // There is no space left for that item.
@@ -4444,8 +4455,10 @@ static void barter_move_from_table_inventory(Object* item, int quantity, int ind
             }
         }
     } else {
-        if (mouseHitTestInWindow(i_wid, INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_X, INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_Y)) {
-            int quantityToMove = quantity > 1 ? do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity) : 1;
+        if (skipDrag || mouseHitTestInWindow(i_wid, INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_X, INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_Y, INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_MAX_X, INVENTORY_SLOT_HEIGHT * inven_cur_disp + INVENTORY_TRADE_RIGHT_SCROLLER_TRACKING_Y)) {
+            if (!skipDrag && quantity > 1) {
+                quantityToMove = do_move_timer(INVENTORY_WINDOW_TYPE_MOVE_ITEMS, item, quantity, quantityToMove);
+            }
             if (quantityToMove != -1) {
                 if (item_move_force(table, target, item, quantityToMove) == -1) {
                     // You cannot pick that up. You are at your maximum weight capacity.
@@ -4462,7 +4475,7 @@ static void barter_move_from_table_inventory(Object* item, int quantity, int ind
 }
 
 // 0x468138
-static void display_table_inventories(int win, Object* peon_table, Object* barterer_table, int index)
+static void display_table_inventories(int win, Object* peon_table, Object* barterer_table, int selected_index, int selected_quantity)
 {
     unsigned char* windowBuffer = win_get_buf(i_wid);
 
@@ -4495,8 +4508,8 @@ static void display_table_inventories(int win, Object* peon_table, Object* barte
                 inventoryItem->quantity,
                 dest,
                 INVENTORY_TRADE_WINDOW_WIDTH,
-                index == index,
-                1);
+                index == selected_index,
+                selected_quantity);
 
             dest += INVENTORY_TRADE_WINDOW_WIDTH * INVENTORY_SLOT_HEIGHT;
         }
@@ -4542,8 +4555,8 @@ static void display_table_inventories(int win, Object* peon_table, Object* barte
                 inventoryItem->quantity,
                 dest,
                 INVENTORY_TRADE_WINDOW_WIDTH,
-                index == index,
-                1);
+                index == selected_index,
+                selected_quantity);
 
             dest += INVENTORY_TRADE_WINDOW_WIDTH * INVENTORY_SLOT_HEIGHT;
         }
@@ -4721,7 +4734,11 @@ void barter_inventory(int win, Object* target, Object* peon_table, Object* barte
                         int index = keyCode - 1000;
                         if (index + stack_offset[curr_stack] < pud->length) {
                             InventoryItem* inventoryItem = &(pud->items[index + stack_offset[curr_stack]]);
-                            barter_move_inventory(inventoryItem->item, inventoryItem->quantity, index, stack_offset[curr_stack], target, peon_table, true);
+                            // Just move item without the need for dragging it if Ctrl key is pressed
+                            bool skipDrag = keys[SDL_SCANCODE_LCTRL] != KEY_STATE_UP || keys[SDL_SCANCODE_RCTRL] != KEY_STATE_UP;
+                            // Move all available items (up to INVENTORY_MAX_MOVE_ITEMS) if Shift key is pressed
+                            bool moveAll = keys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP || keys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP;
+                            barter_move_inventory(inventoryItem->item, inventoryItem->quantity, index, stack_offset[curr_stack], target, peon_table, true, skipDrag, moveAll);
                             display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
                             display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_TRADE);
                             display_table_inventories(win, peon_table, NULL, -1);
@@ -4737,7 +4754,11 @@ void barter_inventory(int win, Object* target, Object* peon_table, Object* barte
                         int index = keyCode - 2000;
                         if (index + target_stack_offset[target_curr_stack] < target_pud->length) {
                             InventoryItem* inventoryItem = &(target_pud->items[index + target_stack_offset[target_curr_stack]]);
-                            barter_move_inventory(inventoryItem->item, inventoryItem->quantity, index, target_stack_offset[target_curr_stack], target, barterer_table, false);
+                            // Just move item without the need for dragging it if Ctrl key is pressed
+                            bool skipDrag = keys[SDL_SCANCODE_LCTRL] != KEY_STATE_UP || keys[SDL_SCANCODE_RCTRL] != KEY_STATE_UP;
+                            // Move all available items (up to INVENTORY_MAX_MOVE_ITEMS) if Shift key is pressed
+                            bool moveAll = keys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP || keys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP;
+                            barter_move_inventory(inventoryItem->item, inventoryItem->quantity, index, target_stack_offset[target_curr_stack], target, barterer_table, false, skipDrag, moveAll);
                             display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
                             display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_TRADE);
                             display_table_inventories(win, NULL, barterer_table, -1);
@@ -4753,7 +4774,11 @@ void barter_inventory(int win, Object* target, Object* peon_table, Object* barte
                         int index = keyCode - 2300;
                         if (index < ptable_pud->length) {
                             InventoryItem* inventoryItem = &(ptable_pud->items[index + ptable_offset]);
-                            barter_move_from_table_inventory(inventoryItem->item, inventoryItem->quantity, index, target, peon_table, true);
+                            // Just move item without the need for dragging it if Ctrl key is pressed
+                            bool skipDrag = keys[SDL_SCANCODE_LCTRL] != KEY_STATE_UP || keys[SDL_SCANCODE_RCTRL] != KEY_STATE_UP;
+                            // Move all available items (up to INVENTORY_MAX_MOVE_ITEMS) if Shift key is pressed
+                            bool moveAll = keys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP || keys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP;
+                            barter_move_from_table_inventory(inventoryItem->item, inventoryItem->quantity, index, target, peon_table, true, skipDrag, moveAll);
                             display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
                             display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_TRADE);
                             display_table_inventories(win, peon_table, NULL, -1);
@@ -4769,7 +4794,11 @@ void barter_inventory(int win, Object* target, Object* peon_table, Object* barte
                         int index = keyCode - 2400;
                         if (index < btable_pud->length) {
                             InventoryItem* inventoryItem = &(btable_pud->items[index + btable_offset]);
-                            barter_move_from_table_inventory(inventoryItem->item, inventoryItem->quantity, index, target, barterer_table, false);
+                            // Just move item without the need for dragging it if Ctrl key is pressed
+                            bool skipDrag = keys[SDL_SCANCODE_LCTRL] != KEY_STATE_UP || keys[SDL_SCANCODE_RCTRL] != KEY_STATE_UP;
+                            // Move all available items (up to INVENTORY_MAX_MOVE_ITEMS) if Shift key is pressed
+                            bool moveAll = keys[SDL_SCANCODE_LSHIFT] != KEY_STATE_UP || keys[SDL_SCANCODE_RSHIFT] != KEY_STATE_UP;
+                            barter_move_from_table_inventory(inventoryItem->item, inventoryItem->quantity, index, target, barterer_table, false, skipDrag, moveAll);
                             display_target_inventory(target_stack_offset[target_curr_stack], -1, target_pud, INVENTORY_WINDOW_TYPE_TRADE);
                             display_inventory(stack_offset[curr_stack], -1, INVENTORY_WINDOW_TYPE_TRADE);
                             display_table_inventories(win, NULL, barterer_table, -1);
