@@ -83,7 +83,7 @@ void inven_action_cursor(int eventCode, int inventoryWindowType);
 int loot_container(Object* a1, Object* a2);
 int inven_steal_container(Object* a1, Object* a2);
 int move_inventory(InventoryItem* inventoryItem, int itemIndex, Object* target, bool isPlanting, bool skipDrag, bool moveAll);
-void barter_inventory(int win, Object* a2, Object* a3, Object* a4, int a5);
+void barter_inventory(int win, Object* target, Object* peon_table, Object* barterer_table, int mod);
 void container_enter(int a1, int a2);
 void container_exit(int keyCode, int inventoryWindowType);
 int drop_into_container(Object* a1, Object* a2, int a3, Object** a4, int quantity);
