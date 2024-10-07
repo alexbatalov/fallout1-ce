@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-set(EXECUTABLE_NAME fallout-ce)
+if(NOT DEFINED EXECUTABLE_NAME)
+    set(EXECUTABLE_NAME fallout-ce)
+endif()
 
 if (APPLE)
     if(IOS)
@@ -14,6 +16,8 @@ if (APPLE)
     endif()
 endif()
 
+
+
 project(${EXECUTABLE_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
@@ -22,11 +26,18 @@ set(CMAKE_CXX_EXTENSIONS NO)
 
 option(ASAN "Enable address sanitizer" OFF)
 option(UBSAN "Enable undefined behaviour sanitizer" OFF)
+option(HTML "Output standalone HTML (emscripten only obviously)" OFF)
 
 if (ANDROID)
     add_library(${EXECUTABLE_NAME} SHARED)
 else()
+
     add_executable(${EXECUTABLE_NAME} WIN32 MACOSX_BUNDLE)
+    
+endif()
+
+if(EMSCRIPTEN AND HTML)
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 if(ASAN)
@@ -36,6 +47,11 @@ endif()
 if(UBSAN)
     target_compile_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
     target_link_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
+endif()
+
+if(EMSCRIPTEN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-lidbfs.js;--use-port=sdl2;-sASYNCIFY;-sFULL_ES2;-sSINGLE_FILE;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC src)
@@ -303,6 +319,7 @@ if (WIN32)
     )
 endif()
 
+
 if(APPLE)
     if(IOS)
         set(RESOURCES
@@ -347,7 +364,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0")
 endif()
 
-if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD"))
+if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"))
     add_subdirectory("third_party/sdl2")
 else()
     find_package(SDL2)
