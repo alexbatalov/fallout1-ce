@@ -270,6 +270,9 @@ bool config_load(Config* config, const char* filePath, bool isDb)
             }
 
             fclose(stream);
+            #ifdef __EMSCRIPTEN__
+                EM_ASM({FS.syncfs(false,function(){alert("save attempted")})});
+            #endif
         }
 
         // FIXME: This function returns `true` even if the file was not actually
@@ -328,6 +331,9 @@ bool config_save(Config* config, const char* filePath, bool isDb)
         }
 
         fclose(stream);
+        #ifdef __EMSCRIPTEN__
+            EM_ASM({FS.syncfs(false,function(){alert("save attempted")})});
+        #endif
     }
 
     return true;
