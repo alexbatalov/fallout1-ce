@@ -8,6 +8,9 @@
 #include "plib/gnw/svga.h"
 #include "plib/gnw/touch.h"
 #include "plib/gnw/vcr.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
 
 namespace fallout {
 
@@ -83,6 +86,25 @@ static bool mouse_disabled;
 
 // 0x671F38
 static int mouse_buttons;
+#ifdef __EMSCRIPTEN__
+bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
+    mouse_simulate_input(eme->movementX,eme->movementY,0);
+    
+    return true;
+}
+bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
+    if(eme->button == 0){
+        mouse_buttons |= MOUSE_STATE_LEFT_BUTTON_DOWN;
+        
+        
+    } else if(eme->button == 2){
+        mouse_buttons |= MOUSE_STATE_RIGHT_BUTTON_DOWN;
+        
+    }
+    return true;
+}
+
+#endif
 
 // 0x671F10
 static unsigned int mouse_speed;
@@ -131,6 +153,11 @@ int GNW_mouse_init()
 
     mouse_is_hidden = true;
 
+    #ifdef __EMSCRIPTEN__
+    emscripten_request_pointerlock(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,true);
+    emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mmove);
+    emscripten_set_click_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
+    #endif
     mouse_colorize();
 
     if (mouse_set_shape(NULL, 0, 0, 0, 0, 0, 0) == -1) {
