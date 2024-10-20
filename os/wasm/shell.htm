@@ -49,7 +49,7 @@
         var inc = 0;
         var maxinc = 0
         function save_files(){
-            currentname = currentname.concat('',prompt("Upload to?"))
+            currentname = currentname.concat(prompt("Upload to?"),'/')
             try {
                 FS.readdir(currentname)
             } catch (error) {

@@ -51,7 +51,7 @@ endif()
 
 if(EMSCRIPTEN)
     target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2")
-    target_link_options(${EXECUTABLE_NAME} PUBLIC "-lidbfs.js;--use-port=sdl2;-sASYNCIFY;-sFULL_ES2;-sSINGLE_FILE;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sEXPORTED_RUNTIME_METHODS=callMain")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sALLOW_MEMORY_GROWTH;-lidbfs.js;--use-port=sdl2;-sASYNCIFY;-sFULL_ES2;-sSINGLE_FILE;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC src)
@@ -303,6 +303,12 @@ if(WIN32)
         _CRT_NONSTDC_NO_WARNINGS
         NOMINMAX
         WIN32_LEAN_AND_MEAN
+    )
+endif()
+
+if(EMSCRIPTEN)
+    target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
+        __EMSCRIPTEN__
     )
 endif()
 

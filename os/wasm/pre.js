@@ -17,7 +17,7 @@ Module['preRun'] = function()
 Module['noInitialRun'] = true
 
 function keyev(ev) {
-        home = "/home/web_user/fallout1"
+        home = "/home/web_user/fallout1/"
         if(ev.key == "`"){
         file_selector.click()
         }
@@ -38,6 +38,7 @@ function keyev(ev) {
                 } catch (error) {
                     
                 }
+                alert("Data loaded. You may now make changes.")
                 loaded = true;
             });
         }
