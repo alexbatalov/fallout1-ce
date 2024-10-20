@@ -88,17 +88,18 @@ static bool mouse_disabled;
 static int mouse_buttons;
 #ifdef __EMSCRIPTEN__
 bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
-    mouse_simulate_input(eme->movementX,eme->movementY,0);
-    
+    mouse_hide();
+    mouse_set_position(mouse_x + eme->movementX,mouse_y + eme->movementY);
+    mouse_show();
     return true;
 }
 bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
     if(eme->button == 0){
-        mouse_buttons |= MOUSE_STATE_LEFT_BUTTON_DOWN;
+        mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
         
         
     } else if(eme->button == 2){
-        mouse_buttons |= MOUSE_STATE_RIGHT_BUTTON_DOWN;
+        mouse_simulate_input(0, 0, MOUSE_STATE_RIGHT_BUTTON_DOWN);
         
     }
     return true;
