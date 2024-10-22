@@ -666,13 +666,7 @@ DB_FILE* db_fopen(const char* filename, const char* mode)
 // 0x4B2664
 int db_fclose(DB_FILE* stream)
 {
-    #ifndef __EMSCRIPTEN__
     return db_delete_fp_rec(stream);
-    #else
-    int rt = db_delete_fp_rec(stream)
-    EM_ASM({FS.syncfs(false,function(){alert("save attempted")})});
-    return rt;
-    #endif
 }
 
 // 0x4AFD50
