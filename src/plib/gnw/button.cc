@@ -407,8 +407,11 @@ int GNW_check_buttons(Window* w, int* keyCodePtr)
         } else {
             win_show(w->id);
         }
-
+        
         if (hoveredButton != NULL) {
+            #ifdef __EMSCRIPTEN__
+                em_setHovered(hoveredButton->id);
+            #endif
             if (!button_under_mouse(hoveredButton, &v58)) {
                 if (!(hoveredButton->flags & BUTTON_FLAG_DISABLED)) {
                     *keyCodePtr = hoveredButton->mouseExitEventCode;

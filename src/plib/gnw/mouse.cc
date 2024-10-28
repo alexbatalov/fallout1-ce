@@ -9,6 +9,8 @@
 #include "plib/gnw/touch.h"
 #include "plib/gnw/vcr.h"
 #ifdef __EMSCRIPTEN__
+#include "plib/gnw/button.h"
+#include "plib/gnw/gnw_types.h"
 #include <emscripten/html5.h>
 #endif
 
@@ -87,6 +89,7 @@ static bool mouse_disabled;
 // 0x671F38
 static int mouse_buttons;
 #ifdef __EMSCRIPTEN__
+int em_HoveredButton;
 bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
     mouse_hide();
     mouse_set_position(mouse_x + eme->movementX,mouse_y + eme->movementY);
@@ -96,6 +99,9 @@ bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
 bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
     if(eme->button == 0){
         mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
+        if(em_HoveredButton != NULL){
+            win_button_press_and_release(em_HoveredButton);
+        }
         
         
     } else if(eme->button == 2){
@@ -105,6 +111,9 @@ bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
     return true;
 }
 
+void em_setHovered(int hb){
+    em_HoveredButton = hb;
+}
 #endif
 
 // 0x671F10

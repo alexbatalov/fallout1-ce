@@ -64,6 +64,9 @@ void mouseGetPositionInWindow(int win, int* x, int* y);
 bool mouseHitTestInWindow(int win, int left, int top, int right, int bottom);
 void mouseGetWheel(int* x, int* y);
 void convertMouseWheelToArrowKey(int* keyCodePtr);
+#ifdef __EMSCRIPTEN__
+void em_setHovered(int hb);
+#endif
 
 } // namespace fallout
 
