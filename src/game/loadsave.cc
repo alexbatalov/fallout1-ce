@@ -48,6 +48,9 @@
 #include "plib/gnw/memory.h"
 #include "plib/gnw/svga.h"
 #include "plib/gnw/text.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace fallout {
 
@@ -799,7 +802,9 @@ int SaveGame(int mode)
             quick_done = true;
         }
     }
-
+    #ifdef __EMSCRIPTEN__
+    EM_ASM({FS.syncfs(false,function(){})});
+    #endif
     return rc;
 }
 

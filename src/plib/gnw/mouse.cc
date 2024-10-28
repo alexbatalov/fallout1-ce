@@ -168,7 +168,7 @@ int GNW_mouse_init()
     #ifdef __EMSCRIPTEN__
     emscripten_request_pointerlock(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,true);
     emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mmove);
-    emscripten_set_click_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
+    emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
     #endif
     mouse_colorize();
 
