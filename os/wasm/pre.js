@@ -9,7 +9,7 @@ Module['preRun'] = function()
     
     function stdin(){return 10};
     var stdout = null;
-    var stderr = null; 
+    function stderr(text){alert("stderr: " + text)} 
     FS.init(stdin,stdout,stderr);
     FS.mount(IDBFS,{},"/home/web_user/");
     
