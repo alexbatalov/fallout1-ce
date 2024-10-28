@@ -89,6 +89,7 @@ static bool mouse_disabled;
 // 0x671F38
 static int mouse_buttons;
 #ifdef __EMSCRIPTEN__
+bool em_hovered = false;
 int em_HoveredButton;
 bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
     mouse_hide();
@@ -99,7 +100,7 @@ bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
 bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
     if(eme->button == 0){
         mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
-        if(em_HoveredButton != NULL){
+        if(em_hovered){
             win_button_press_and_release(em_HoveredButton);
         }
         
@@ -111,8 +112,9 @@ bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
     return true;
 }
 
-void em_setHovered(int hb){
+void em_setHovered(int hb, bool Hovered){
     em_HoveredButton = hb;
+    em_hovered = Hovered;
 }
 #endif
 
