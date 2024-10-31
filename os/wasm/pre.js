@@ -79,12 +79,18 @@ document.addEventListener('click', (ev) => {
         document.getElementById("Instructions3").remove();
         document.getElementById("Instructions4").remove();
         document.getElementById("Instructions5").remove();
+        document.getElementById("Instructions6").remove();
         Module.callMain(args);
 });}
     else{
         FS.chdir("/home/web_user/fallout1");
         document.removeEventListener("keydown",keyev,true);
-        document.getElementById("Instructions").remove();
+        document.getElementById("Instructions1").remove();
+        document.getElementById("Instructions2").remove();
+        document.getElementById("Instructions3").remove();
+        document.getElementById("Instructions4").remove();
+        document.getElementById("Instructions5").remove();
+        document.getElementById("Instructions6").remove();
         Module.callMain(args);
     }
     
