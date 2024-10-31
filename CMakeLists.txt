@@ -37,7 +37,11 @@ else()
 endif()
 
 if(EMSCRIPTEN AND DEFINED PRELOAD)
-    target_link_options(${EXECUTABLE_NAME} PUBLIC --preload-file ${PRELOAD}@/preload)
+    if(HTML)
+    target_link_options(${EXECUTABLE_NAME} PUBLIC --embed-file ${PRELOAD}@/preload)
+    else()
+        target_link_options(${EXECUTABLE_NAME} PUBLIC --preload-file ${PRELOAD}@/preload)
+    endif()
 endif()
 
 if(EMSCRIPTEN AND HTML)
