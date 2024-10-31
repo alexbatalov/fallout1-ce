@@ -92,6 +92,7 @@ static int mouse_buttons;
 bool em_leftDown = false;
 bool em_rightDown = false;
 int em_moveX = 0;
+bool em_locked = false;
 int em_moveY = 0;
 bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
     em_moveX = eme->movementX;
@@ -99,6 +100,7 @@ bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
     return true;
 }
 bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
+    if(!em_locked){emscripten_request_pointerlock(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,false);em_locked = true;}
     if(eme->button == 0){
         em_leftDown = true;
 
@@ -166,7 +168,7 @@ int GNW_mouse_init()
     mouse_is_hidden = true;
 
     #ifdef __EMSCRIPTEN__
-    emscripten_request_pointerlock(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,true);
+    
     emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mmove);
     emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
     emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mup);
