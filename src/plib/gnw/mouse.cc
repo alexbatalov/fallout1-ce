@@ -89,12 +89,10 @@ static bool mouse_disabled;
 // 0x671F38
 static int mouse_buttons;
 #ifdef __EMSCRIPTEN__
-int em_mousebutton = 0;
 bool em_leftDown = false;
+bool em_rightDown = false;
 int em_moveX = 0;
 int em_moveY = 0;
-bool em_hovered = false;
-int em_HoveredButton;
 bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
     em_moveX = eme->movementX;
     em_moveY = eme->movementY;
@@ -105,18 +103,18 @@ bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
         em_leftDown = true;
 
     } else if(eme->button == 2){
-        em_mousebutton |= MOUSE_STATE_RIGHT_BUTTON_DOWN;
+        em_rightDown = true;
     }
     return true;
 }
 bool em_mup(int ev, const EmscriptenMouseEvent *eme, void *x){
-    em_leftDown = false;
-    return true;
-}
+    if(eme->button == 0){
+        em_leftDown = false;
 
-void em_setHovered(int hb, bool Hovered){
-    em_HoveredButton = hb;
-    em_hovered = Hovered;
+    } else if(eme->button == 2){
+        em_rightDown = false;
+    }
+    return true;
 }
 #endif
 
@@ -541,13 +539,14 @@ void mouse_info()
     #ifdef __EMSCRIPTEN__
     x = em_moveX;
     y = em_moveY;
-    buttons = em_mousebutton;
     if(em_leftDown){
         buttons |= MOUSE_STATE_LEFT_BUTTON_DOWN;
     }
+    if(em_rightDown){
+        buttons |= MOUSE_STATE_RIGHT_BUTTON_DOWN;
+    }
     em_moveX = 0;
     em_moveY = 0;
-    em_mousebutton = 0;
     #endif
     // Adjust for mouse senstivity.
     x = (int)(x * mouse_sensitivity);
