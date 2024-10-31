@@ -36,7 +36,12 @@ else()
     
 endif()
 
+if(EMSCRIPTEN AND DEFINED PRELOAD)
+    target_link_options(${EXECUTABLE_NAME} PUBLIC --preload-file ${PRELOAD}@/preload)
+endif()
+
 if(EMSCRIPTEN AND HTML)
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sSINGLE_FILE")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
@@ -51,7 +56,7 @@ endif()
 
 if(EMSCRIPTEN)
     target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2")
-    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sALLOW_MEMORY_GROWTH;-lidbfs.js;--use-port=sdl2;-sASYNCIFY;-sFULL_ES2;-sSINGLE_FILE;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sEXPORTED_RUNTIME_METHODS=callMain")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sALLOW_MEMORY_GROWTH;-lidbfs.js;--use-port=sdl2;-sASYNCIFY;-sFULL_ES2;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC src)

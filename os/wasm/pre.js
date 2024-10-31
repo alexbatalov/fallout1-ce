@@ -60,9 +60,20 @@ document.addEventListener('click', (ev) => {
         } catch (error) {
             
         }
-        FS.chdir("/home/web_user/fallout1");
+        if(FS.analyzePath("/preload/DATA").exists){
+            FS.chdir("/preload")
+            FS.symlink("/home/web_user/fallout1/DATA/SAVEGAME","/preload/DATA/SAVEGAME");
+        }
+        else{
+            FS.chdir("/home/web_user/fallout1");
+        }
+        
+        
         document.removeEventListener("keydown",keyev,true);
-        document.getElementById("Instructions").remove();
+        document.getElementById("Instructions1").remove();
+        document.getElementById("Instructions2").remove();
+        document.getElementById("Instructions3").remove();
+        document.getElementById("Instructions4").remove();
         Module.callMain(args);
 });}
     else{

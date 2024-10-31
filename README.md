@@ -8,7 +8,8 @@ There is also [Fallout 2 Community Edition](https://github.com/alexbatalov/fallo
 
 You must own the game to play. Purchase your copy on [GOG](https://www.gog.com/game/fallout) or [Steam](https://store.steampowered.com/app/38400). Download latest [release](https://github.com/alexbatalov/fallout1-ce/releases) or build from source. You can also check latest [debug](https://github.com/alexbatalov/fallout1-ce/actions) build intended for testers.
 
-For Webassembly, building from source is roughly the same except you must have emsdk {Install from here}(https://emscripten.org/docs/getting_started/downloads.html), and instead of the normal cmake command, you would use `emcmake cmake {source directory}` to output a js file you can use, and `emcmake cmake {source directory} -DHTML="true"` to output a standalone html file!
+For Webassembly, building from source is roughly the same as with Linux except you must have emsdk {Install from here}(https://emscripten.org/docs/getting_started/downloads.html), and instead of the normal cmake command, you would use `emcmake cmake {source directory}` to output a js file you can use, and `emcmake cmake {source directory} -DHTML="true"` to output a standalone html file! You may also use `emcmake cmake {source directory} -DPRELOAD="${directory to preload}" `, but this will take a lot of memory when actually running the game so beware!
+
 
 ### Windows
 
