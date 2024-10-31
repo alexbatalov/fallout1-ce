@@ -42,6 +42,10 @@ function keyev(ev) {
                 loaded = true;
             });
         }
+        else if(ev.key == '-'){
+            del = home.concat('',prompt("Delete which file?"))
+            FS.unlink(del)
+        }
     
     
     
@@ -74,6 +78,7 @@ document.addEventListener('click', (ev) => {
         document.getElementById("Instructions2").remove();
         document.getElementById("Instructions3").remove();
         document.getElementById("Instructions4").remove();
+        document.getElementById("Instructions5").remove();
         Module.callMain(args);
 });}
     else{
