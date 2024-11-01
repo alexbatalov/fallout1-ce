@@ -9,8 +9,6 @@
 #include "plib/gnw/touch.h"
 #include "plib/gnw/vcr.h"
 #ifdef __EMSCRIPTEN__
-#include "plib/gnw/button.h"
-#include "plib/gnw/gnw_types.h"
 #include <emscripten/html5.h>
 #endif
 
@@ -168,7 +166,6 @@ int GNW_mouse_init()
     mouse_is_hidden = true;
 
     #ifdef __EMSCRIPTEN__
-    
     emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mmove);
     emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
     emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mup);
