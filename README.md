@@ -4,7 +4,7 @@ Fallout Community Edition is a fully working re-implementation of Fallout, with 
 
 Oh, also, credit where credit is due. I used the pull requests from [dje4321](https://github.com/dje4321) and [bit-hack](https://github.com/bit-hack) to fix some issues. Mainly, bit-hack fixed saving on linux systems, and dje4321 fixed some corruption on the prerendered cutscene.
 
-Video of me getting it working... ish (Turns out, it's hit or miss on firefox, I mainly tested on chrome so I know it works there)
+Video of me getting it working... ish (Turns out, it's hit or miss on firefox, I mainly tested on chrome so I know it works there). Anyways, just do these steps but on Chrome...
 https://youtu.be/8LWQ0XcMh50
 
 Thank you guys!
