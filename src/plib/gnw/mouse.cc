@@ -414,6 +414,7 @@ void mouse_hide()
 }
 
 // 0x4B4DD8
+// New version of mouse_info for touch devices
 void mouse_info()
 {
     if (!have_mouse) {
@@ -434,11 +435,18 @@ void mouse_info()
         static int prevy;
 
         switch (gesture.type) {
-        case kTap:
+            case kTap:
             if (gesture.numberOfTouches == 1) {
-                mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
+                // Save current cursor position
+                int current_x, current_y;
+                mouse_get_position(&current_x, &current_y);
+
+                // Simulate moving the cursor (move) to a new position
+                mouse_simulate_input(gesture.x - current_x, gesture.y - current_y, MOUSE_STATE_LEFT_BUTTON_DOWN);
             } else if (gesture.numberOfTouches == 2) {
                 mouse_simulate_input(0, 0, MOUSE_STATE_RIGHT_BUTTON_DOWN);
+            } else if (gesture.numberOfTouches == 3) {
+                mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
             }
             break;
         case kLongPress:
@@ -497,7 +505,6 @@ void mouse_info()
         y = 0;
     }
 
-    // Adjust for mouse senstivity.
     x = (int)(x * mouse_sensitivity);
     y = (int)(y * mouse_sensitivity);
 
@@ -515,8 +522,6 @@ void mouse_info()
 
     mouse_simulate_input(x, y, buttons);
 
-    // TODO: Move to `_mouse_simulate_input`.
-    // TODO: Record wheel event in VCR.
     gMouseWheelX = mouseData.wheelX;
     gMouseWheelY = mouseData.wheelY;
 
@@ -525,6 +530,7 @@ void mouse_info()
         raw_buttons |= MOUSE_EVENT_WHEEL;
     }
 }
+
 
 // 0x4B4ECC
 void mouse_simulate_input(int delta_x, int delta_y, int buttons)
@@ -649,6 +655,22 @@ bool mouse_in(int left, int top, int right, int bottom)
 }
 
 // 0x4B51C0
+// Expanding cursor hot Size for touch devices
+bool mouse_click_in(int left, int top, int right, int bottom)
+{
+    int expand = 10; // Extend active area by 10 pixels (set as needed)
+
+    if (!have_mouse) {
+        return false;
+    }
+
+    return (mouse_hoty + mouse_y >= top - expand) &&
+           (mouse_hotx + mouse_x <= right + expand) &&
+           (mouse_hotx + mouse_x >= left - expand) &&
+           (mouse_hoty + mouse_y <= bottom + expand);
+}
+
+/*
 bool mouse_click_in(int left, int top, int right, int bottom)
 {
     if (!have_mouse) {
@@ -660,6 +682,7 @@ bool mouse_click_in(int left, int top, int right, int bottom)
         && mouse_hotx + mouse_x >= left
         && mouse_hoty + mouse_y <= bottom;
 }
+ */
 
 // 0x4B522C
 void mouse_get_rect(Rect* rect)
