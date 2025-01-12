@@ -20,6 +20,8 @@ For Webassembly, building from source is roughly the same as with Linux except y
 If you opt for the standalone HTML file, you're going to have to upload all of the game files into the game's filesystem. So, it's a sort of tradeoff between memory usage and ease of access.
 Also, the audio is... not the best. Oh *also* if you want to click the escape button without unfullscreening, you could fullscreen with f11.
 
+Another thing: The JS files are pretty untested. I only made this in the first place with the intent to put it into a single HTML file. If you have any problems, feel free to make an issue or PR!
+
 ### Windows
 
 Download and copy `fallout-ce.exe` to your `Fallout` folder. It serves as a drop-in replacement for `falloutw.exe`.
