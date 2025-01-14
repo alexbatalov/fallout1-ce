@@ -407,7 +407,6 @@ int GNW_check_buttons(Window* w, int* keyCodePtr)
         } else {
             win_show(w->id);
         }
-
         if (hoveredButton != NULL) {
             if (!button_under_mouse(hoveredButton, &v58)) {
                 if (!(hoveredButton->flags & BUTTON_FLAG_DISABLED)) {
@@ -461,7 +460,7 @@ int GNW_check_buttons(Window* w, int* keyCodePtr)
                 }
                 return 0;
             }
-        }
+        } 
 
         int v25 = last_button_winID;
         if (last_button_winID != -1 && last_button_winID != w->id) {

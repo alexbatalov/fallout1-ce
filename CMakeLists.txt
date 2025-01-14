@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-set(EXECUTABLE_NAME fallout-ce)
+if(NOT DEFINED EXECUTABLE_NAME)
+    set(EXECUTABLE_NAME fallout-ce)
+endif()
 
 if (APPLE)
     if(IOS)
@@ -14,6 +16,8 @@ if (APPLE)
     endif()
 endif()
 
+
+
 project(${EXECUTABLE_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
@@ -22,11 +26,27 @@ set(CMAKE_CXX_EXTENSIONS NO)
 
 option(ASAN "Enable address sanitizer" OFF)
 option(UBSAN "Enable undefined behaviour sanitizer" OFF)
+option(HTML "Output standalone HTML (emscripten only obviously)" OFF)
 
 if (ANDROID)
     add_library(${EXECUTABLE_NAME} SHARED)
 else()
+
     add_executable(${EXECUTABLE_NAME} WIN32 MACOSX_BUNDLE)
+    
+endif()
+
+if(EMSCRIPTEN AND DEFINED PRELOAD)
+    if(HTML)
+    target_link_options(${EXECUTABLE_NAME} PUBLIC --embed-file ${PRELOAD}@/preload)
+    else()
+        target_link_options(${EXECUTABLE_NAME} PUBLIC --preload-file ${PRELOAD}@/preload)
+    endif()
+endif()
+
+if(EMSCRIPTEN AND HTML)
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "--shell-file=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/shell.htm;-sSINGLE_FILE")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
 if(ASAN)
@@ -36,6 +56,11 @@ endif()
 if(UBSAN)
     target_compile_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
     target_link_options(${EXECUTABLE_NAME} PUBLIC "-fsanitize=undefined")
+endif()
+
+if(EMSCRIPTEN)
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC "--use-port=sdl2")
+    target_link_options(${EXECUTABLE_NAME} PUBLIC "-sASYNCIFY_STACK_SIZE=10000000;-sALLOW_MEMORY_GROWTH;-lidbfs.js;--use-port=sdl2;-sASYNCIFY;-sFULL_ES2;--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/os/wasm/pre.js;-sEXPORTED_RUNTIME_METHODS=callMain")
 endif()
 
 target_include_directories(${EXECUTABLE_NAME} PUBLIC src)
@@ -290,6 +315,12 @@ if(WIN32)
     )
 endif()
 
+if(EMSCRIPTEN)
+    target_compile_definitions(${EXECUTABLE_NAME} PUBLIC
+        __EMSCRIPTEN__
+    )
+endif()
+
 if(WIN32)
     target_link_libraries(${EXECUTABLE_NAME}
         winmm
@@ -302,6 +333,7 @@ if (WIN32)
         "os/windows/fallout-ce.rc"
     )
 endif()
+
 
 if(APPLE)
     if(IOS)
@@ -347,7 +379,7 @@ if(APPLE)
     set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0")
 endif()
 
-if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD"))
+if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD") AND (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"))
     add_subdirectory("third_party/sdl2")
 else()
     find_package(SDL2)

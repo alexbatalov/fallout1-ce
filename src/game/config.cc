@@ -8,6 +8,9 @@
 #include "platform_compat.h"
 #include "plib/db/db.h"
 #include "plib/gnw/memory.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace fallout {
 
@@ -270,6 +273,7 @@ bool config_load(Config* config, const char* filePath, bool isDb)
             }
 
             fclose(stream);
+
         }
 
         // FIXME: This function returns `true` even if the file was not actually
@@ -328,6 +332,7 @@ bool config_save(Config* config, const char* filePath, bool isDb)
         }
 
         fclose(stream);
+        
     }
 
     return true;

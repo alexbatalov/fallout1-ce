@@ -8,6 +8,9 @@
 #include "plib/gnw/svga.h"
 #include "plib/gnw/touch.h"
 #include "plib/gnw/vcr.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
 
 namespace fallout {
 
@@ -83,6 +86,37 @@ static bool mouse_disabled;
 
 // 0x671F38
 static int mouse_buttons;
+#ifdef __EMSCRIPTEN__
+bool em_leftDown = false;
+bool em_rightDown = false;
+int em_moveX = 0;
+bool em_locked = false;
+int em_moveY = 0;
+bool em_mmove(int ev, const EmscriptenMouseEvent *eme, void *x){
+    em_moveX = eme->movementX;
+    em_moveY = eme->movementY;
+    return true;
+}
+bool em_mclick(int ev, const EmscriptenMouseEvent *eme, void *x){
+    if(!em_locked){emscripten_request_pointerlock(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,false);em_locked = true;}
+    if(eme->button == 0){
+        em_leftDown = true;
+
+    } else if(eme->button == 2){
+        em_rightDown = true;
+    }
+    return true;
+}
+bool em_mup(int ev, const EmscriptenMouseEvent *eme, void *x){
+    if(eme->button == 0){
+        em_leftDown = false;
+
+    } else if(eme->button == 2){
+        em_rightDown = false;
+    }
+    return true;
+}
+#endif
 
 // 0x671F10
 static unsigned int mouse_speed;
@@ -131,6 +165,11 @@ int GNW_mouse_init()
 
     mouse_is_hidden = true;
 
+    #ifdef __EMSCRIPTEN__
+    emscripten_set_mousemove_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mmove);
+    emscripten_set_mousedown_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mclick);
+    emscripten_set_mouseup_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT,NULL,false,em_mup);
+    #endif
     mouse_colorize();
 
     if (mouse_set_shape(NULL, 0, 0, 0, 0, 0, 0) == -1) {
@@ -475,7 +514,7 @@ void mouse_info()
 
         return;
     }
-
+    
     int x;
     int y;
     int buttons = 0;
@@ -496,7 +535,18 @@ void mouse_info()
         x = 0;
         y = 0;
     }
-
+    #ifdef __EMSCRIPTEN__
+    x = em_moveX;
+    y = em_moveY;
+    if(em_leftDown){
+        buttons |= MOUSE_STATE_LEFT_BUTTON_DOWN;
+    }
+    if(em_rightDown){
+        buttons |= MOUSE_STATE_RIGHT_BUTTON_DOWN;
+    }
+    em_moveX = 0;
+    em_moveY = 0;
+    #endif
     // Adjust for mouse senstivity.
     x = (int)(x * mouse_sensitivity);
     y = (int)(y * mouse_sensitivity);

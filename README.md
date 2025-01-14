@@ -2,11 +2,25 @@
 
 Fallout Community Edition is a fully working re-implementation of Fallout, with the same original gameplay, engine bugfixes, and some quality of life improvements, that works (mostly) hassle-free on multiple platforms.
 
+Oh, also, credit where credit is due. I used the pull requests from [dje4321](https://github.com/dje4321) and [bit-hack](https://github.com/bit-hack) to fix some issues. Mainly, bit-hack fixed saving on linux systems, and dje4321 fixed some corruption on the prerendered cutscene.
+
+Video of it working (and instructions on how to do it). With firefox, you can't save... well, you kinda can, but it's weird.
+https://youtu.be/EB6Jsm0oMzM
+
+Thank you guys!
+
 There is also [Fallout 2 Community Edition](https://github.com/alexbatalov/fallout2-ce).
 
 ## Installation
 
 You must own the game to play. Purchase your copy on [GOG](https://www.gog.com/game/fallout) or [Steam](https://store.steampowered.com/app/38400). Download latest [release](https://github.com/alexbatalov/fallout1-ce/releases) or build from source. You can also check latest [debug](https://github.com/alexbatalov/fallout1-ce/actions) build intended for testers.
+
+For Webassembly, building from source is roughly the same as with Linux except you must have emsdk {Install from here}(https://emscripten.org/docs/getting_started/downloads.html), and instead of the normal cmake command, you would use `emcmake cmake {source directory}` to output a js file you can use, and `emcmake cmake {source directory} -DHTML="true"` to output a standalone html file! You may also use `emcmake cmake {source directory} -DPRELOAD="${directory to preload}" `, but this will take a lot of memory when actually running the game so beware!
+
+If you opt for the standalone HTML file, you're going to have to upload all of the game files into the game's filesystem. So, it's a sort of tradeoff between memory usage and ease of access.
+Also, the audio is... not the best. Oh *also* if you want to click the escape button without unfullscreening, you could fullscreen with f11.
+
+Another thing: The JS files are pretty untested. I only made this in the first place with the intent to put it into a single HTML file. If you have any problems, feel free to make an issue or PR!
 
 ### Windows
 

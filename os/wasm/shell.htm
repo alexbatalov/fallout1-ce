@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<!-- Thank You Stack Overflow! -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1">
+    <title>Fallout1</title>
+</head>
+
+<body style="margin:0;padding:0">
+
+    <!-- Create the canvas that the C++ code will draw into -->
+    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <p id="Instructions1">Press ] before starting game and making any changes to allow changes to your saves before you start the game.</p>
+    <p id="Instructions2"> Press ` before starting the game to upload files</p>
+    <p id="Instructions3">Press = before starting the game to save files.</p>
+    <p id="Instructions4">Press \ before starting the game to read a directory</p>
+    <p id="Instructions5">Press - before starting the game to delete a file</p>
+    <p id="Instructions6">Click on the webpage to start the game.</p>
+    <!-- Allow the C++ to access the canvas element --> 
+    <script type='text/javascript'>
+        var Module = {
+            canvas: (function() { return document.getElementById('canvas'); })()
+        };
+        Module['preRun'] = []
+    </script>
+    <script type='text/javascript'>
+        var currentname = "/home/web_user/fallout1/"
+        const file_reader = new FileReader();
+        file_reader.addEventListener("load", readf);
+        function readf(event){
+            //also heavily derivative of Riot's code on Stack Overflow cause I sure as hell don't udnerstand it.
+            const uint8Arr = new Uint8Array(file_reader.result);
+            console.log(currentname+fls[inc].name);
+            try {
+                stream = FS.open(currentname+fls[inc].name,'w');
+            } catch (error) {
+                alert(error.toString() + "... Was that not a directory?");
+                return;
+            }
+            
+            FS.write(stream, uint8Arr, 0, uint8Arr.length, 0);
+            FS.close(stream);
+            inc += 1;
+            if(inc == maxinc){inc = 0;maxinc = 0;file_reader.onloadend = "";currentname="/home/web_user/fallout1/"}
+            else{
+                file_reader.onloadend = file_reader.readAsArrayBuffer(fls[inc]);
+            }
+            alert("File Uploaded");
+        }
+
+        var fname = ""
+        var fls = []
+        var inc = 0;
+        var maxinc = 0
+        function save_files(){
+            currentname = currentname.concat(prompt("Upload to?"),'/')
+            try {
+                FS.readdir(currentname)
+            } catch (error) {
+                FS.mkdirTree(currentname);
+            }
+            fls = this.files
+            maxinc = fls.length
+            file_reader.readAsArrayBuffer(fls[inc]);
+            
+        };
+        
+
+        var file_selector = document.createElement('input');
+        file_selector.setAttribute('type', 'file');
+        file_selector.setAttribute('multiple', '');
+        file_selector.addEventListener("change", save_files, false);
+        
+
+
+    </script>
+    <!-- Where the script shall be -->
+    {{{ SCRIPT }}}
+    
+</body>
+
+</html>

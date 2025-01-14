@@ -10,7 +10,9 @@
 #else
 #include <dirent.h>
 #endif
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 #include <fpattern.h>
 
 #include "platform_compat.h"
