@@ -57,10 +57,17 @@ $ mv app /Applications/Fallout
 ### Android
 
 > **NOTE**: Fallout was designed with mouse in mind. There are many controls that require precise cursor positioning, which is not possible with fingers. Current control scheme resembles trackpad usage:
-> - One finger moves mouse cursor around.
+
+> - One finger tap moves mouse cursor to the tapped position and does left mouse click. (new!)
+> - One finger drag moves mouse cursor around. The finger doesn't have to be at the cursor position, but anywhere on the screen. This is useful for accurate selection of dialogue options, and precise aiming during combat.
 > - Tap one finger for left mouse click.
 > - Tap two fingers for right mouse click (switches mouse cursor mode).
 > - Move two fingers to scroll current view (map view, worldmap view, inventory scrollers).
+> - Tap with three fingers to simulate a left mouse button click at the cursor's current location without moving it. This is ideal for accurately selecting dialogue options or executing precise attacks during combat.
+
+> **NOTE**: To activate UI buttons, you need to double-tap on them.
+
+
 
 > **NOTE**: From Android standpoint release and debug builds are different apps. Both apps require their own copy of game assets and have their own savegames. This is intentional. As a gamer just stick with release version and check for updates.
 
