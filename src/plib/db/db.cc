@@ -11,7 +11,7 @@
 #include <dirent.h>
 #endif
 
-#include <fpattern.h>
+#include <fpattern/fpattern.h>
 
 #include "platform_compat.h"
 #include "plib/assoc/assoc.h"
