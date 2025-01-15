@@ -6,12 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <adecode/adecode.h>
+
 #include "game/cache.h"
 #include "game/gconfig.h"
 #include "game/sfxlist.h"
 #include "plib/db/db.h"
 #include "plib/gnw/memory.h"
-#include "sound_decoder.h"
 
 namespace fallout {
 
@@ -42,7 +43,7 @@ static void sfxc_handle_destroy(int handle);
 static bool sfxc_handle_is_legal(int a1);
 static bool sfxc_mode_is_legal(int mode);
 static int sfxc_decode(int handle, void* buf, unsigned int size);
-static int sfxc_ad_reader(void* stream, void* buf, unsigned int size);
+static unsigned int sfxc_ad_reader(void* stream, void* buf, unsigned int size);
 
 // 0x507A70
 static int sfxc_dlevel = INT_MAX;
@@ -515,7 +516,7 @@ static int sfxc_decode(int handle, void* buf, unsigned int size)
 }
 
 // 0x4978F0
-static int sfxc_ad_reader(void* stream, void* buf, unsigned int size)
+static unsigned int sfxc_ad_reader(void* stream, void* buf, unsigned int size)
 {
     if (size == 0) {
         return 0;
