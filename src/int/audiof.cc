@@ -4,11 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <adecode/adecode.h>
+
 #include "int/memdbg.h"
 #include "int/sound.h"
 #include "platform_compat.h"
 #include "plib/gnw/debug.h"
-#include "sound_decoder.h"
 
 namespace fallout {
 
@@ -28,7 +29,7 @@ typedef struct AudioFile {
 } AudioFile;
 
 static bool defaultCompressionFunc(char* filePath);
-static int decodeRead(void* stream, void* buffer, unsigned int size);
+static unsigned int decodeRead(void* stream, void* buffer, unsigned int size);
 
 // 0x4FEC04
 static AudioFileQueryCompressedFunc* queryCompressedFunc = defaultCompressionFunc;
@@ -51,7 +52,7 @@ static bool defaultCompressionFunc(char* filePath)
 }
 
 // 0x419EB0
-static int decodeRead(void* stream, void* buffer, unsigned int size)
+static unsigned int decodeRead(void* stream, void* buffer, unsigned int size)
 {
     return fread(buffer, 1, size, (FILE*)stream);
 }

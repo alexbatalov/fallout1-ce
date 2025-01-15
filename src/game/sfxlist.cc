@@ -5,11 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <adecode/adecode.h>
+
 #include "platform_compat.h"
 #include "plib/db/db.h"
 #include "plib/gnw/debug.h"
 #include "plib/gnw/memory.h"
-#include "sound_decoder.h"
 
 namespace fallout {
 
@@ -27,7 +28,7 @@ static int sfxl_copy_names(char** fileNameList);
 static int sfxl_get_sizes();
 static int sfxl_sort_by_name();
 static int sfxl_compare_by_name(const void* a1, const void* a2);
-static int sfxl_ad_reader(void* stream, void* buf, unsigned int size);
+static unsigned int sfxl_ad_reader(void* stream, void* buf, unsigned int size);
 
 // 0x507A8C
 static bool sfxl_initialized = false;
@@ -408,7 +409,7 @@ static int sfxl_compare_by_name(const void* a1, const void* a2)
 }
 
 // 0x4980A0
-static int sfxl_ad_reader(void* stream, void* buf, unsigned int size)
+static unsigned int sfxl_ad_reader(void* stream, void* buf, unsigned int size)
 {
     return db_fread(buf, 1, size, (DB_FILE*)stream);
 }

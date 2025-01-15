@@ -257,8 +257,6 @@ target_sources(${EXECUTABLE_NAME} PUBLIC
     "src/plib/gnw/winmain.h"
     "src/movie_lib.cc"
     "src/movie_lib.h"
-    "src/sound_decoder.cc"
-    "src/sound_decoder.h"
 )
 
 target_sources(${EXECUTABLE_NAME} PUBLIC
@@ -352,6 +350,9 @@ if((NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (NOT ${CMAKE_SYSTEM_NAME} MATC
 else()
     find_package(SDL2)
 endif()
+
+add_subdirectory("third_party/adecode")
+target_link_libraries(${EXECUTABLE_NAME} adecode::adecode)
 
 add_subdirectory("third_party/fpattern")
 target_link_libraries(${EXECUTABLE_NAME} fpattern::fpattern)
