@@ -33,6 +33,9 @@ int main(int argc, char* argv[])
 {
     int rc;
 
+    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+
 #if _WIN32
     GNW95_mutex = CreateMutexA(0, TRUE, "GNW95MUTEX");
     if (GetLastError() != ERROR_SUCCESS) {
@@ -41,8 +44,6 @@ int main(int argc, char* argv[])
 #endif
 
 #if __APPLE__ && TARGET_OS_IOS
-    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
-    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
     chdir(iOSGetDocumentsPath());
 #endif
 
@@ -53,8 +54,6 @@ int main(int argc, char* argv[])
 #endif
 
 #if __ANDROID__
-    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
-    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
     chdir(SDL_AndroidGetExternalStoragePath());
 #endif
 
