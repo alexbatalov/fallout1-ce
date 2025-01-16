@@ -5071,22 +5071,23 @@ void draw_amount(int value, int inventoryWindowType)
     unsigned char* windowBuffer = win_get_buf(mt_wid);
 
     if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
-        rect.ulx = 153;
+        rect.ulx = 147;
         rect.uly = 45;
-        rect.lrx = 195;
+        rect.lrx = 199;
         rect.lry = 69;
 
-        int ranks[3];
-        ranks[2] = value % 10;
-        ranks[1] = value / 10 % 10;
-        ranks[0] = value / 100 % 10;
+        int ranks[4];
+        ranks[3] = value % 10;
+        ranks[2] = value / 10 % 10;
+        ranks[1] = value / 100 % 10;
+        ranks[0] = value / 1000 % 10;
 
         windowBuffer += rect.uly * windowWidth + rect.ulx;
 
-        for (int index = 0; index < 3; index++) {
+        for (int index = 0; index < 4; index++) {
             unsigned char* src = data + 14 * ranks[index];
             buf_to_buf(src, 14, 24, 336, windowBuffer, windowWidth);
-            windowBuffer += 14;
+            windowBuffer += 13;
         }
     } else {
         rect.ulx = 133;
@@ -5113,8 +5114,8 @@ static int do_move_timer(int inventoryWindowType, Object* item, int max)
     int min;
     if (inventoryWindowType == INVENTORY_WINDOW_TYPE_MOVE_ITEMS) {
         value = 1;
-        if (max > 999) {
-            max = 999;
+        if (max > 9999) {
+            max = 9999;
         }
         min = 1;
     } else {
@@ -5180,7 +5181,7 @@ static int do_move_timer(int inventoryWindowType, Object* item, int max)
                     value = 0;
                 }
 
-                value = 10 * value % 1000 + number;
+                value = 10 * value % 10000 + number;
                 v5 = true;
 
                 draw_amount(value, inventoryWindowType);
