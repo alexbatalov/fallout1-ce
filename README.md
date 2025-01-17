@@ -54,6 +54,22 @@ $ mv app /Applications/Fallout
 
 - Run `fallout-ce.app`.
 
+### macOS build
+
+Before start:
+
+- Clone this repository to your computer
+- install Xcode if haven't installed it yet: [link](https://developer.apple.com/support/xcode/)
+- Open root folder of this repository in any terminal app
+
+Build:
+
+- Configure (based on your platform):
+  - Intel: `cmake -B build -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY='' -D CMAKE_OSX_ARCHITECTURES=x86_64`
+  - Apple Silicon: `cmake -B build -G Xcode -D CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY='' -D CMAKE_OSX_ARCHITECTURES=arm64`
+- Build: `cmake --build build --config RelWithDebInfo -j $(sysctl -n hw.physicalcpu)`
+- find your new application at path `/build/RelWithDebInfo/Fallout Community Edition.app`
+
 ### Android
 
 > **NOTE**: Fallout was designed with mouse in mind. There are many controls that require precise cursor positioning, which is not possible with fingers. Current control scheme resembles trackpad usage:
